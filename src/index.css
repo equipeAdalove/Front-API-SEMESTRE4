@@ -1,68 +1,512 @@
+/* ============================================= */
+/* == GERAL == */
+/* ============================================= */
+
+/* Import Poppins Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --background-color: #F0F2F5;
+  --home-bg-color: #FFFFFF;
+  --container-bg-color: #7886C733;
+  --primary-text-color: #21109F;
+  --secondary-text-color: #7469B6;
+  --button-color: #21109F;
+  --button-hover-color: #5a5ad4;
+  --form-input-bg: #F0F2F5;
+  --form-input-text: #000000;
+  --form-input-border: #ccd0d5;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+[data-theme='dark'] {
+  --background-color: #07002F;
+  --home-bg-color: #100a2a;
+  --container-bg-color: rgba(120, 134, 199, 0.2);
+  --primary-text-color: #FFFFFF;
+  --secondary-text-color: #A9A6B8;
+  --button-color: #4b4bca;
+  --button-hover-color: #5a5ad4;
+  --form-input-bg: rgba(255, 255, 255, 0.1);
+  --form-input-text: #FFFFFF;
+  --form-input-border: rgba(255, 255, 255, 0.2);
 }
-a:hover {
-  color: #535bf2;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--background-color);
+  color: var(--primary-text-color);
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.3s, color 0.3s;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* ============================================= */
+/* == PÁGINA HOME == */
+/* ============================================= */
+
+.home-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--home-bg-color); /* Usa variável */
+  position: relative;
+  overflow: hidden;
+  padding: 2rem 4rem;
+  transition: background-color 0.3s;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+.home-header {
+  display: flex;
+  align-items: center;
+  width: 2%;
+}
+
+.header-info span {
+  visibility: hidden;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo-text {
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: var(--primary-text-color);
+}
+
+/* Estilos do Toggle Switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--button-color);
+  -webkit-transition: .4s;
+  transition: .4s;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked+.slider {
+  background-color: var(--button-color);
+}
+
+input:focus+.slider {
+  box-shadow: 0 0 1px var(--button-color);
+}
+
+input:checked+.slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+/* Conteúdo Principal */
+.home-main-content {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  z-index: 5;
+}
+
+.home-main-content .welcome-text {
+  max-width: 50%;
+  flex-basis: 50%;
+}
+
+.home-main-content .welcome-text h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.home-main-content .welcome-text p {
+  font-size: 1.2rem;
+  color: var(--secondary-text-color);
+  margin-bottom: 2rem;
+}
+
+.cta-button {
+  background-color: var(--button-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 1rem 2.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.cta-button:hover {
+  background-color: var(--button-hover-color);
+}
+
+/* Imagem do Polvo */
+.image-container {
+  position: absolute;
+  right: -620px;
+  top: 53%;
+  transform: translateY(-50%);
+  width: 60%;
+  z-index: 1;
+}
+
+.octopus-image {
+  width: 600px;
+  height: auto;
+  opacity: var(--octopus-opacity, 1); /* Opacidade para o polvo no light mode */
+}
+
+/* Rodapé */
+.home-footer {
+  width: 100%;
+  z-index: 10;
+  padding-bottom: 1rem;
+}
+
+.help-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--primary-text-color);
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.help-link:hover {
+  text-decoration: underline;
+}
+
+/* ============================================= */
+/* == PÁGINA PRINCIPAL == */
+/* ============================================= */
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.icon {
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: var(--primary-text-color);
+}
+
+.toggle-icon {
+  font-size: 2.5rem;
+}
+
+.main-content {
+  flex-grow: 1;
+}
+
+.welcome-section {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.octopus-logo {
+  width: 250px;
+}
+
+.welcome-text h1 {
+  font-size: 2.2rem;
+  font-weight: 600;
+}
+
+.welcome-text p {
+  font-size: 1.1rem;
+  color: var(--secondary-text-color);
+}
+
+.disclaimer {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--secondary-text-color);
+  margin-bottom: 3rem;
+}
+
+.mission-section {
+  background-color: var(--container-bg-color);
+  border-radius: 12px;
+  padding: 2rem;
+  color: var(--secondary-text-color);
+  transition: background-color 0.3s;
+}
+
+.mission-section p {
+  margin-bottom: 1rem;
+}
+
+.mission-section ul {
+  list-style-position: inside;
+  padding-left: 1rem;
+  margin-bottom: 1rem;
+}
+
+.mission-section li {
+  margin-bottom: 0.5rem;
+}
+
+.app-footer {
+  width: 100%;
+  padding: 2rem 1.5rem;
+  margin-top: 3rem;
+  background-color: var(--container-bg-color);
+  transition: background-color 0.3s;
+}
+
+.footer-logo {
+  height: 50px;
+  margin-bottom: -70px;
+}
+
+.developed-by {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--secondary-text-color);
+  margin-left: -27px;
+}
+
+.dalove {
+  height: 105px;
+}
+
+.submit-document-button {
+  background-color: var(--button-color);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 15px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 20px;
+}
+
+.submit-document-button .pdf-icon {
+  font-size: 24px;
+  margin-right: 15px;
+}
+
+.submit-document-button span {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.uploaded-file-name {
+  background-color: transparent;
+  padding: 10px 20px;
+  border-top: 1px solid rgba(120, 134, 199, 0.2);
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1px;
+}
+
+.uploaded-file-name span {
+  font-size: 16px;
+  color: var(--primary-text-color);
+}
+
+.remove-file-button {
+  background: none;
+  border: none;
+  color: var(--secondary-text-color);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease-in-out;
+}
+
+.remove-file-button:hover {
+  color: var(--primary-text-color);
+}
+
+.submit-document-button-success {
+  background-color: var(--button-color);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  border-radius: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.submit-document-button-success .button-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.submit-document-button-success .pdf-icon {
+  font-size: 24px;
+}
+
+.submit-document-button-success span {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.submit-document-button-success .check-icon {
+  font-size: 24px;
+  color: #fff;
+}
+
+.data-preview-section {
+  background-color: var(--container-bg-color);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-top: 1rem;
+  transition: background-color 0.3s;
+}
+
+.data-preview-section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.data-form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group.description-group {
+  grid-column: 2 / 3;
+  grid-row: 1 / 4;
+}
+
+.form-label {
+  font-size: 0.9rem;
+  color: var(--secondary-text-color);
+}
+
+.form-input,
+.form-textarea {
+  background-color: var(--form-input-bg); /* Usa variável */
+  border: 1px solid var(--form-input-border); /* Usa variável */
+  border-radius: 8px;
+  padding: 0.8rem;
+  color: var(--form-input-text); /* Usa variável */
+  font-family: 'Poppins', sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.form-textarea {
+  min-height: 200px;
+  resize: vertical;
+}
+
+.form-note {
+  font-size: 0.75rem;
+  color: var(--secondary-text-color);
+  margin-top: 4px;
+}
+
+.editable-note {
+  font-size: 0.9rem;
+  color: var(--primary-text-color);
+  margin-top: 1.5rem;
+  text-align: left;
+}
+
+.export-button {
+  background-color: var(--button-color);
+  color: white;
+  border: none;
+  padding: 15px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-top: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.export-button:hover {
+  background-color: var(--button-hover-color);
 }
