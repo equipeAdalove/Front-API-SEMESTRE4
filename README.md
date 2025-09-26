@@ -1,69 +1,81 @@
-# React + TypeScript + Vite
+# **Frontend - AdaTech (React + TypeScript + Vite)**
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este projeto implementa o **frontend da aplicação AdaTech**, responsável por fornecer a interface gráfica para o usuário interagir com o backend de Classificação Fiscal.
 
-Currently, two official plugins are available:
+A interface permite o **upload de arquivos PDF** contendo descrições de componentes eletrônicos, exibe os resultados processados pelo backend e possibilita o download do arquivo **Excel gerado automaticamente**.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## 🚀 **Funcionalidades**
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+* Upload de arquivos PDF pelo navegador.
+* Envio dos arquivos para o backend via API REST.
+* Exibição do status de processamento (loading, sucesso, erro).
+* Download direto do arquivo Excel contendo os resultados processados.
+* Interface moderna e responsiva construída com **React + Vite + TypeScript**.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 📂 **Estrutura do Projeto**
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+frontend/
+│── public/               # Arquivos estáticos
+│── src/                  # Código-fonte principal
+│   ├── components/       # Componentes reutilizáveis da UI
+│   ├── pages/            # Páginas da aplicação
+│   ├── services/         # Comunicação com a API
+│   ├── App.tsx           # Componente raiz
+│   └── main.tsx          # Ponto de entrada React
+│── index.html            # HTML principal
+│── package.json          # Dependências do projeto
+│── tsconfig.json         # Configurações TypeScript
+│── vite.config.ts        # Configuração do Vite
+│── eslint.config.js      # Regras de linting
+│── README.md             # Este arquivo
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## ⚙️ **Tecnologias Utilizadas**
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+* **TypeScript** → fornece segurança com tipagem estática.
+* **React** → biblioteca para construção de interfaces declarativas e componentizadas.
+* **Vite** → ferramenta de build rápida e eficiente, com HMR (Hot Module Replacement).
+* **ESLint** → garante padronização e qualidade do código.
+
+---
+
+## 📥 **Instalação**
+
+1. Clone o repositório:
+
+```bash
+git clone https://github.com/equipeAdalove/Front-API-SEMESTRE4.git
+cd Front-API-SEMESTRE4/frontend
 ```
+
+2. Instale as dependências:
+
+```bash
+npm install
+```
+
+3. Inicie o servidor de desenvolvimento:
+
+```bash
+npm run dev
+```
+
+4. O frontend estará disponível em:
+
+```
+http://localhost:5173
+```
+
+---
+
+## 🔗 **Integração com o Backend**
+
+* O frontend se comunica com o backend (FastAPI) via **API REST**.
+* A URL da API deve ser configurada em um arquivo de ambiente (ex: `.env` ou `config.ts`).
