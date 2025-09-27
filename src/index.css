@@ -229,6 +229,9 @@ input:checked+.slider:before {
   max-width: 1400px;
   margin: 0 auto;
   padding: 1.5rem;
+  flex: 1; /* ocupa o espaço restante */
+  display: flex;
+  flex-direction: column;
 }
 
 .app-header {
@@ -257,7 +260,9 @@ input:checked+.slider:before {
 }
 
 .main-content {
-  flex-grow: 1;
+  flex: 1; 
+  display: flex;
+  flex-direction: column;
 }
 
 .welcome-section {
@@ -312,27 +317,32 @@ input:checked+.slider:before {
 
 .app-footer {
   width: 100%;
-  padding: 2rem 1.5rem;
+  padding: 1rem 2rem;
   margin-top: 3rem;
   background-color: var(--container-bg-color);
   transition: background-color 0.3s;
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
 }
 
 .footer-logo {
   height: 50px;
-  margin-bottom: -70px;
+  margin: 0; 
 }
+
 
 .developed-by {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   color: var(--secondary-text-color);
-  margin-left: -27px;
+  margin: 0; 
 }
 
+
 .dalove {
-  height: 105px;
+  height: 60px; 
 }
 
 .submit-document-button {
@@ -509,4 +519,10 @@ input:checked+.slider:before {
 
 .export-button:hover {
   background-color: var(--button-hover-color);
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* altura mínima = altura da tela */
 }
