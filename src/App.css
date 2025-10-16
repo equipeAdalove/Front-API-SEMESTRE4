@@ -40,3 +40,22 @@
 .read-the-docs {
   color: #888;
 }
+
+.data-form-extraction {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.form-textarea-small {
+  background-color: var(--form-input-bg);
+  border: 1px solid var(--form-input-border);
+  border-radius: 8px;
+  padding: 0.8rem;
+  color: var(--form-input-text);
+  font-family: 'Poppins', sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 80px; /* Altura menor para a descrição bruta */
+  resize: vertical;
+}

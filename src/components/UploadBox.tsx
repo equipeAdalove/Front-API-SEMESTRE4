@@ -1,27 +1,24 @@
-import { FaFilePdf, FaCheck, FaTimes, FaDownload } from "react-icons/fa";
+// Remova o 'FaDownload' da linha abaixo
+import { FaFilePdf, FaCheck, FaTimes } from "react-icons/fa";
 
 type UploadBoxProps = {
   file: File | null;
   loading: boolean;
-  downloadUrl: string | null;
-  downloadName: string;
   onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
   onRemove: () => void;
   onUpload: () => void;
-  onDownload: () => void;
+  uploadButtonText?: string;
 };
 
 function UploadBox({
   file,
   loading,
-  downloadUrl,
-  downloadName,
   onFileSelect,
   onDrop,
   onRemove,
   onUpload,
-  onDownload,
+  uploadButtonText,
 }: UploadBoxProps) {
   return (
     <div className="upload-box">
@@ -51,13 +48,8 @@ function UploadBox({
             </button>
           </div>
           <button onClick={onUpload} disabled={loading} className="export-button">
-            {loading ? "Processando..." : "Enviar PDF"}
+            {loading ? "Processando..." : (uploadButtonText || "Enviar PDF")}
           </button>
-          {downloadUrl && (
-            <button onClick={onDownload} className="export-button">
-              <FaDownload /> Baixar Resultado
-            </button>
-          )}
         </>
       )}
 
