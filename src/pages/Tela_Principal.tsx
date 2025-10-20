@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import UploadBox from "../components/UploadBox";
 import ExtractionFormSection from "../components/ExtractionFormSection";
 import FormSection from "../components/FormSection";
+import Loader from "../components/Loader"; // Importar o Loader
 import type { ExtractedItem, ProcessedItem } from "../types";
 
 type TelaPrincipalProps = {
@@ -37,21 +38,11 @@ function Tela_Principal({ isDarkMode, toggleTheme }: TelaPrincipalProps) {
     if (!file) return;
     setUiState("extracting");
     setError(null);
-
     const formData = new FormData();
     formData.append("file", file);
-
     try {
-      const response = await fetch("http://localhost:8000/api/extract_from_pdf", {
-        method: "POST",
-        body: formData, // Correção do bug do FormData
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || "Erro na extração do PDF");
-      }
-
+      const response = await fetch("http://localhost:8000/api/extract_from_pdf", { method: "POST", body: formData });
+      if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.detail || "Erro na extração do PDF"); }
       const data: ExtractedItem[] = await response.json();
       setExtractedItems(data);
       setUiState("extracted");
@@ -65,18 +56,16 @@ function Tela_Principal({ isDarkMode, toggleTheme }: TelaPrincipalProps) {
     setUiState("processing");
     setError(null);
     try {
-        const response = await fetch("http://localhost:8000/api/process_items", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ items: extractedItems }),
-        });
-        if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.detail || "Erro no processamento dos itens."); }
-        const data: ProcessedItem[] = await response.json();
-        setProcessedItems(data);
-        setUiState("processed");
+      const response = await fetch("http://localhost:8000/api/process_items", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: extractedItems }),
+      });
+      if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.detail || "Erro no processamento dos itens."); }
+      const data: ProcessedItem[] = await response.json();
+      setProcessedItems(data);
+      setUiState("processed");
     } catch (err: any) {
-        setError(err.message);
-        setUiState("extracted");
+      setError(err.message);
+      setUiState("extracted");
     }
   };
   
@@ -85,24 +74,22 @@ function Tela_Principal({ isDarkMode, toggleTheme }: TelaPrincipalProps) {
     setUiState("exporting");
     setError(null);
     try {
-        const response = await fetch("http://localhost:8000/api/generate_excel", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ items: processedItems }),
-        });
-        if (!response.ok) throw new Error("Erro ao gerar o arquivo Excel.");
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${file?.name.replace(".pdf", "")}_classificado.xlsx`;
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
+      const response = await fetch("http://localhost:8000/api/generate_excel", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: processedItems }),
+      });
+      if (!response.ok) throw new Error("Erro ao gerar o arquivo Excel.");
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${file?.name.replace(".pdf", "")}_classificado.xlsx`;
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
     } catch (err: any) {
-        setError(err.message);
+      setError(err.message);
     } finally {
-        setUiState("processed");
+      setUiState("processed");
     }
   };
 
@@ -127,65 +114,78 @@ function Tela_Principal({ isDarkMode, toggleTheme }: TelaPrincipalProps) {
             <img src={adatech} alt="Logo de Polvo" className="octopus-logo" />
             <div className="content-right">
               <div className="welcome-text"><h1>Bem-vindo(a)!</h1><p>Como posso ajudar?</p></div>
-              <UploadBox
-                file={file}
-                loading={isLoading}
-                onFileSelect={(e) => { 
-                  const selectedFile = e.target.files?.[0] || null;
-                  setFile(selectedFile);
-                  setUiState("initial");
-                  setExtractedItems([]);
-                  setProcessedItems([]);
-                  setError(null);
-                }}
-                onDrop={(e) => { 
-                  e.preventDefault(); 
-                  const droppedFile = e.dataTransfer.files[0] || null;
-                  setFile(droppedFile);
-                  setUiState("initial");
-                  setExtractedItems([]);
-                  setProcessedItems([]);
-                  setError(null);
-                }}
-                onRemove={resetState}
-                onUpload={handleExtract}
-                uploadButtonText={file ? "Extrair Dados do PDF" : "Enviar PDF"}
-              />
+              {!isLoading ? (
+                <UploadBox
+                  file={file}
+                  loading={false}
+                  onFileSelect={(e) => {
+                    const selectedFile = e.target.files?.[0] || null;
+                    setFile(selectedFile);
+                    setUiState("initial"); setExtractedItems([]); setProcessedItems([]); setError(null);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const droppedFile = e.dataTransfer.files?.[0] || null;
+                    setFile(droppedFile);
+                    setUiState("initial"); setExtractedItems([]); setProcessedItems([]); setError(null);
+                  }}
+                  onRemove={resetState}
+                  onUpload={handleExtract}
+                  uploadButtonText={file ? "Extrair Dados do PDF" : "Enviar PDF"}
+                />
+              ) : ( <Loader /> )}
               {error && <p className="error-message">{error}</p>}
             </div>
           </div>
           
-          {uiState === "extracted" && (
+          {uiState === "extracted" && !isLoading && (
             <section className="validation-section">
               <h2 className="data-preview-section-h2">Validação da Extração:</h2>
               <p className="editable-note">Verifique e corrija os Part Numbers e descrições extraídos antes de continuar.</p>
               {extractedItems.map((item, index) => (
                 <ExtractionFormSection key={index} item={item} index={index} onItemChange={handleExtractedChange} />
               ))}
-              {/* CORREÇÃO APLICADA AQUI */}
               <button onClick={handleProcess} disabled={isLoading} className="export-button">
                 Processar Itens Corrigidos
               </button>
             </section>
           )}
 
-          { (uiState === "processed" || uiState === "exporting") && (
+          { (uiState === "processed" || uiState === "exporting") && !isLoading && (
             <section className="validation-section">
               <h2 className="data-preview-section-h2">Validação Final:</h2>
               {processedItems.map((item, index) => (
                 <FormSection key={index} item={item} index={index} onItemChange={handleProcessedChange} />
               ))}
               <p className="editable-note">É possível editar os campos!</p>
+              {/* CORREÇÃO APLICADA AQUI */}
               <button onClick={handleExport} disabled={isLoading} className="export-button">
-                {uiState === 'exporting' ? "Exportando..." : "Confirmar e exportar em formato .xlsx"}
+                {isLoading ? "Exportando..." : "Confirmar e exportar em formato .xlsx"}
               </button>
             </section>
           )}
 
-          {uiState === "initial" && !file && (
+          {uiState === "initial" && !file && !isLoading && (
             <section className="mission-section">
-              <p>Minha missão é automatizar...</p>
-              {/* Resto do conteúdo da missão */}
+              {/* ... Conteúdo da Missão ... */}
+              <p>
+                Minha missão é automatizar a criação da instrução de registro aduaneiro, garantindo que ela seja clara, completa e em conformidade com as exigências legais.
+              </p>
+              <p>Para isso, eu:</p>
+              <ul>
+                <li>
+                  Organizo e relaciono dados essenciais como Part-Number, NCM, fabricante e origem completa (com endereço)
+                </li>
+                <li>
+                  Gero descrições precisas dos produtos, evitando ambiguidades;
+                </li>
+                <li>
+                  Asseguro que a documentação seja compreensível para a Receita Federal, reduzindo o risco de multas ou penalidades.
+                </li>
+              </ul>
+              <p>
+                Meu objetivo é simplificar esse processo, tornando-o mais rápido, confiável e livre de erros.
+              </p>
             </section>
           )}
         </main>
