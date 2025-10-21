@@ -5,15 +5,17 @@ import Footer from "../components/Footer";
 import UploadBox from "../components/UploadBox";
 import ExtractionFormSection from "../components/ExtractionFormSection";
 import FormSection from "../components/FormSection";
-import Loader from "../components/Loader"; // Importar o Loader
+import Loader from "../components/Loader";
 import type { ExtractedItem, ProcessedItem } from "../types";
+import { FaCheckCircle } from "react-icons/fa"; // Importar ícone de sucesso
 
 type TelaPrincipalProps = {
   isDarkMode: boolean;
   toggleTheme: () => void;
 };
 
-type UIState = "initial" | "extracting" | "extracted" | "processing" | "processed" | "exporting";
+// Adicionando o novo estado
+type UIState = "initial" | "extracting" | "extracted" | "processing" | "processed" | "exporting" | "downloaded";
 
 function Tela_Principal({ isDarkMode, toggleTheme }: TelaPrincipalProps) {
   const [file, setFile] = useState<File | null>(null);
@@ -33,8 +35,9 @@ function Tela_Principal({ isDarkMode, toggleTheme }: TelaPrincipalProps) {
     const fileInput = document.getElementById("pdf-upload") as HTMLInputElement;
     if (fileInput) fileInput.value = "";
   };
-  
+
   const handleExtract = async () => {
+    // ... (sem alterações)
     if (!file) return;
     setUiState("extracting");
     setError(null);
@@ -53,6 +56,7 @@ function Tela_Principal({ isDarkMode, toggleTheme }: TelaPrincipalProps) {
   };
 
   const handleProcess = async () => {
+    // ... (sem alterações)
     setUiState("processing");
     setError(null);
     try {
@@ -68,7 +72,7 @@ function Tela_Principal({ isDarkMode, toggleTheme }: TelaPrincipalProps) {
       setUiState("extracted");
     }
   };
-  
+
   const handleExport = async () => {
     if (processedItems.length === 0) return;
     setUiState("exporting");
@@ -86,13 +90,17 @@ function Tela_Principal({ isDarkMode, toggleTheme }: TelaPrincipalProps) {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
+      // Mudar para o estado 'downloaded' em caso de sucesso
+      setUiState("downloaded");
     } catch (err: any) {
       setError(err.message);
-    } finally {
+      // Voltar para 'processed' em caso de erro na exportação
       setUiState("processed");
     }
+    // Removido o 'finally' que sempre voltava para 'processed'
   };
 
+  // Funções handleExtractedChange e handleProcessedChange (sem alterações)
   const handleExtractedChange = (index: number, field: keyof ExtractedItem, value: string) => {
     const updated = [...extractedItems];
     updated[index] = { ...updated[index], [field]: value };
@@ -105,6 +113,11 @@ function Tela_Principal({ isDarkMode, toggleTheme }: TelaPrincipalProps) {
     setProcessedItems(updated);
   };
 
+  // Nova função para voltar a visualizar os dados
+  const handleViewData = () => {
+    setUiState("processed");
+  };
+
   return (
     <div className="app-container">
       <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
@@ -114,6 +127,8 @@ function Tela_Principal({ isDarkMode, toggleTheme }: TelaPrincipalProps) {
             <img src={adatech} alt="Logo de Polvo" className="octopus-logo" />
             <div className="content-right">
               <div className="welcome-text"><h1>Bem-vindo(a)!</h1><p>Como posso ajudar?</p></div>
+
+              {/* UploadBox OU Loader */}
               {!isLoading ? (
                 <UploadBox
                   file={file}
@@ -132,39 +147,59 @@ function Tela_Principal({ isDarkMode, toggleTheme }: TelaPrincipalProps) {
                   onRemove={resetState}
                   onUpload={handleExtract}
                   uploadButtonText={file ? "Extrair Dados do PDF" : "Enviar PDF"}
+                  // Passa a prop para esconder o botão após a extração inicial
+                  showUploadButton={uiState === "initial" && !!file}
                 />
               ) : ( <Loader /> )}
+
               {error && <p className="error-message">{error}</p>}
             </div>
           </div>
-          
+
+          {/* Validação da Extração */}
           {uiState === "extracted" && !isLoading && (
             <section className="validation-section">
               <h2 className="data-preview-section-h2">Validação da Extração:</h2>
               <p className="editable-note">Verifique e corrija os Part Numbers e descrições extraídos antes de continuar.</p>
-              {extractedItems.map((item, index) => (
-                <ExtractionFormSection key={index} item={item} index={index} onItemChange={handleExtractedChange} />
-              ))}
+              <div className="form-list-grid">
+                {extractedItems.map((item, index) => (
+                  <ExtractionFormSection key={index} item={item} index={index} onItemChange={handleExtractedChange} />
+                ))}
+              </div>
               <button onClick={handleProcess} disabled={isLoading} className="export-button">
                 Processar Itens Corrigidos
               </button>
             </section>
           )}
 
-          { (uiState === "processed" || uiState === "exporting") && !isLoading && (
+          {/* Validação Final */}
+          { uiState === "processed" && !isLoading && (
             <section className="validation-section">
               <h2 className="data-preview-section-h2">Validação Final:</h2>
-              {processedItems.map((item, index) => (
-                <FormSection key={index} item={item} index={index} onItemChange={handleProcessedChange} />
-              ))}
+              <div className="form-list-grid">
+                {processedItems.map((item, index) => (
+                  <FormSection key={index} item={item} index={index} onItemChange={handleProcessedChange} />
+                ))}
+              </div>
               <p className="editable-note">É possível editar os campos!</p>
-              {/* CORREÇÃO APLICADA AQUI */}
               <button onClick={handleExport} disabled={isLoading} className="export-button">
-                {isLoading ? "Exportando..." : "Confirmar e exportar em formato .xlsx"}
+                Confirmar e exportar em formato .xlsx
               </button>
             </section>
           )}
 
+          {/* Nova Seção Pós-Download */}
+          {uiState === "downloaded" && !isLoading && (
+             <section className="download-success-section">
+                <FaCheckCircle className="success-icon" />
+                <h2>Download concluído com sucesso!</h2>
+                <button onClick={handleViewData} className="view-data-button">
+                    Visualizar Dados
+                </button>
+             </section>
+          )}
+
+          {/* Seção Inicial */}
           {uiState === "initial" && !file && !isLoading && (
             <section className="mission-section">
               {/* ... Conteúdo da Missão ... */}

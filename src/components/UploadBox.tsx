@@ -1,4 +1,3 @@
-// Remova o 'FaDownload' da linha abaixo
 import { FaFilePdf, FaCheck, FaTimes } from "react-icons/fa";
 
 type UploadBoxProps = {
@@ -9,6 +8,7 @@ type UploadBoxProps = {
   onRemove: () => void;
   onUpload: () => void;
   uploadButtonText?: string;
+  showUploadButton?: boolean; // Nova prop para controlar o botão
 };
 
 function UploadBox({
@@ -19,6 +19,7 @@ function UploadBox({
   onRemove,
   onUpload,
   uploadButtonText,
+  showUploadButton = true, // Valor padrão é true
 }: UploadBoxProps) {
   return (
     <div className="upload-box">
@@ -37,9 +38,11 @@ function UploadBox({
           <div className="submit-document-button-success">
             <div className="button-content">
               <FaFilePdf className="pdf-icon" />
-              <span>Documento pronto para envio!</span>
+              {/* Mensagem ligeiramente ajustada para clareza */}
+              <span>{showUploadButton ? "Documento pronto para envio!" : "Documento carregado:"}</span>
             </div>
-            <FaCheck className="check-icon" />
+            {/* O check só aparece antes da primeira extração */}
+            {showUploadButton && <FaCheck className="check-icon" />}
           </div>
           <div className="uploaded-file-name">
             <span>{file.name}</span>
@@ -47,9 +50,12 @@ function UploadBox({
               <FaTimes />
             </button>
           </div>
-          <button onClick={onUpload} disabled={loading} className="export-button">
-            {loading ? "Processando..." : (uploadButtonText || "Enviar PDF")}
-          </button>
+          {/* Renderização condicional do botão de upload */}
+          {showUploadButton && (
+            <button onClick={onUpload} disabled={loading} className="export-button">
+              {loading ? "Processando..." : (uploadButtonText || "Enviar PDF")}
+            </button>
+          )}
         </>
       )}
 

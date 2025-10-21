@@ -55,7 +55,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: var(--home-bg-color); /* Usa variável */
+  background-color: var(--home-bg-color); 
   position: relative;
   overflow: hidden;
   padding: 2rem 4rem;
@@ -198,7 +198,7 @@ input:checked+.slider:before {
 .octopus-image {
   width: 600px;
   height: auto;
-  opacity: var(--octopus-opacity, 1); /* Opacidade para o polvo no light mode */
+  opacity: var(--octopus-opacity, 1); 
 }
 
 /* Rodapé */
@@ -229,7 +229,7 @@ input:checked+.slider:before {
   max-width: 1400px;
   margin: 0 auto;
   padding: 1.5rem;
-  flex: 1; /* ocupa o espaço restante */
+  flex: 1; 
   display: flex;
   flex-direction: column;
 }
@@ -474,11 +474,11 @@ input:checked+.slider:before {
 
 .form-input,
 .form-textarea {
-  background-color: var(--form-input-bg); /* Usa variável */
-  border: 1px solid var(--form-input-border); /* Usa variável */
+  background-color: var(--form-input-bg);
+  border: 1px solid var(--form-input-border); 
   border-radius: 8px;
   padding: 0.8rem;
-  color: var(--form-input-text); /* Usa variável */
+  color: var(--form-input-text); 
   font-family: 'Poppins', sans-serif;
   width: 100%;
   box-sizing: border-box;
@@ -524,20 +524,20 @@ input:checked+.slider:before {
 .app-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* altura mínima = altura da tela */
+  min-height: 100vh; 
 }
 
 .loader-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 2rem; /* Adiciona um espaço ao redor */
+  padding: 2rem; 
 }
 
 .three-body {
-  --uib-size: 45px; /* Aumentei um pouco o tamanho */
+  --uib-size: 45px; 
   --uib-speed: 0.8s;
-  --uib-color: var(--button-color); /* Usando a cor do botão do tema */
+  --uib-color: var(--button-color); 
   position: relative;
   display: inline-block;
   height: var(--uib-size);
@@ -657,6 +657,53 @@ input:checked+.slider:before {
   font-family: 'Poppins', sans-serif;
   width: 100%;
   box-sizing: border-box;
-  min-height: 80px; /* Altura menor para a descrição bruta */
+  min-height: 80px; 
   resize: vertical;
+}
+
+.download-success-section {
+  background-color: var(--container-bg-color);
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  margin-top: 2rem;
+  text-align: center;
+  transition: background-color 0.3s;
+}
+
+.download-success-section .success-icon {
+  font-size: 3rem;
+  color: #4CAF50; 
+  margin-bottom: 1rem;
+}
+
+[data-theme='dark'] .download-success-section .success-icon {
+  color: #66BB6A; 
+}
+
+.download-success-section h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: var(--primary-text-color);
+}
+
+.view-data-button {
+  background-color: transparent;
+  color: var(--button-color);
+  border: 1px solid var(--button-color);
+  border-radius: 8px;
+  padding: 0.8rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.view-data-button:hover {
+  background-color: var(--button-color);
+  color: #ffffff; 
+}
+
+.validation-section {
+  margin-bottom: 2rem;
 }
