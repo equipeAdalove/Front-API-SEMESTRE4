@@ -1,25 +1,27 @@
-import { FaFilePdf, FaCheck, FaTimes } from "react-icons/fa";
+import { FaFilePdf, FaCheck, FaTimes, FaDownload } from "react-icons/fa";
 
 type UploadBoxProps = {
   file: File | null;
   loading: boolean;
+  downloadUrl: string | null;
+  downloadName: string;
   onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
   onRemove: () => void;
   onUpload: () => void;
-  uploadButtonText?: string;
-  showUploadButton?: boolean; // Nova prop para controlar o botão
+  onDownload: () => void;
 };
 
 function UploadBox({
   file,
   loading,
+  downloadUrl,
+  downloadName,
   onFileSelect,
   onDrop,
   onRemove,
   onUpload,
-  uploadButtonText,
-  showUploadButton = true, // Valor padrão é true
+  onDownload,
 }: UploadBoxProps) {
   return (
     <div className="upload-box">
@@ -38,11 +40,9 @@ function UploadBox({
           <div className="submit-document-button-success">
             <div className="button-content">
               <FaFilePdf className="pdf-icon" />
-              {/* Mensagem ligeiramente ajustada para clareza */}
-              <span>{showUploadButton ? "Documento pronto para envio!" : "Documento carregado:"}</span>
+              <span>Documento pronto para envio!</span>
             </div>
-            {/* O check só aparece antes da primeira extração */}
-            {showUploadButton && <FaCheck className="check-icon" />}
+            <FaCheck className="check-icon" />
           </div>
           <div className="uploaded-file-name">
             <span>{file.name}</span>
@@ -50,10 +50,12 @@ function UploadBox({
               <FaTimes />
             </button>
           </div>
-          {/* Renderização condicional do botão de upload */}
-          {showUploadButton && (
-            <button onClick={onUpload} disabled={loading} className="export-button">
-              {loading ? "Processando..." : (uploadButtonText || "Enviar PDF")}
+          <button onClick={onUpload} disabled={loading} className="export-button">
+            {loading ? "Processando..." : "Enviar PDF"}
+          </button>
+          {downloadUrl && (
+            <button onClick={onDownload} className="export-button">
+              <FaDownload /> Baixar Resultado
             </button>
           )}
         </>
