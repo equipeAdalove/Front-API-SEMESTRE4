@@ -1,7 +1,8 @@
+import React from 'react';
 import centrops from "../assets/Centro_Paula_Souza.png";
 import adalove from "../assets/AdaLove.png";
 
-function Footer() {
+const Footer: React.FC = () => {
   return (
     <footer className="app-footer">
       <img
@@ -15,6 +16,6 @@ function Footer() {
       </div>
     </footer>
   );
-}
+};
 
 export default Footer;

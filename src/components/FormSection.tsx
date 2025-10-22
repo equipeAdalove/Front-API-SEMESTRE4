@@ -1,82 +1,34 @@
-import type { ProcessedItem } from "../types";
-
-type FormSectionProps = {
-  item: ProcessedItem;
-  index: number;
-  onItemChange: (index: number, field: keyof ProcessedItem, value: string) => void;
-};
-
-function FormSection({ item, index, onItemChange }: FormSectionProps) {
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    onItemChange(index, name as keyof ProcessedItem, value);
-  };
-
+function FormSection() {
   return (
-    <div className="data-preview-section">
+    <section className="data-preview-section">
+      <h2>Pré-visualização dos dados:</h2>
       <form className="data-form">
         <div className="form-group">
-          <label htmlFor={`manufacturer-name-${index}`}>Nome do Fabricante:</label>
-          <input
-            id={`manufacturer-name-${index}`}
-            name="fabricante"
-            type="text"
-            className="form-input"
-            value={item.fabricante}
-            onChange={handleChange}
-          />
-          {item.is_new_manufacturer && (
-            <p className="form-note">
-              O fabricante "{item.fabricante}" será adicionado ao banco de dados!
-            </p>
-          )}
+          <label htmlFor="manufacturer-name">Nome do Fabricante:</label>
+          <input id="manufacturer-name" type="text" className="form-input" />
+          <p className="form-note">
+            O fabricante "ABC" será adicionado ao banco de dados!
+          </p>
         </div>
         <div className="form-group">
-          <label htmlFor={`manufacturer-address-${index}`}>Endereço do Fabricante:</label>
-          <input
-            id={`manufacturer-address-${index}`}
-            name="localizacao"
-            type="text"
-            className="form-input"
-            value={item.localizacao}
-            onChange={handleChange}
-          />
+          <label htmlFor="manufacturer-address">Endereço do Fabricante:</label>
+          <input id="manufacturer-address" type="text" className="form-input" />
         </div>
         <div className="form-group">
-          <label htmlFor={`part-number-final-${index}`}>Part-Number:</label>
-          <input
-            id={`part-number-final-${index}`}
-            name="partnumber"
-            type="text"
-            className="form-input"
-            value={item.partnumber}
-            readOnly
-          />
+          <label htmlFor="part-number">Part-Number:</label>
+          <input id="part-number" type="text" className="form-input" />
         </div>
         <div className="form-group description-group">
-          <label htmlFor={`description-${index}`}>Descrição:</label>
-          <textarea
-            id={`description-${index}`}
-            name="descricao"
-            className="form-textarea"
-            value={item.descricao}
-            onChange={handleChange}
-          ></textarea>
+          <label htmlFor="description">Descrição:</label>
+          <textarea id="description" className="form-textarea"></textarea>
         </div>
         <div className="form-group">
-          <label htmlFor={`ncm-code-${index}`}>Código NCM:</label>
-          <input
-            id={`ncm-code-${index}`}
-            name="ncm"
-            type="text"
-            className="form-input"
-            value={item.ncm}
-            onChange={handleChange}
-          />
+          <label htmlFor="ncm-code">Código NCM:</label>
+          <input id="ncm-code" type="text" className="form-input" />
         </div>
       </form>
-    </div>
+      <p className="editable-note">É possível editar os campos!</p>
+    </section>
   );
 }
 

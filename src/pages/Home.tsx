@@ -1,30 +1,32 @@
-// src/pages/Home.tsx
 import { FaGithub } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom'; 
 import octopusImage from '../assets/Polvo_AdaTech.png';
 
-// 1. Defina o tipo para as props
 type HomeProps = {
-  onNavigate: () => void;
   isDarkMode: boolean;
   toggleTheme: () => void;
 };
 
-// 2. Aplique o tipo e use as props
-function Home({ onNavigate, isDarkMode, toggleTheme }: HomeProps) {
+function Home({ isDarkMode, toggleTheme }: HomeProps) {
+  const navigate = useNavigate(); 
+
+  const handleNavigate = () => {
+    navigate('/login');
+  };
+
   return (
-    // Adicionada classe para estilização condicional se necessário
     <div className={`home-container ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
       <header className="home-header">
         <nav className="header-nav">
           <span className="logo-text">AdaTech</span>
           <label className="switch">
-            <input 
-              type="checkbox" 
-              checked={!isDarkMode} // Invertido para o switch (desligado=dark)
-              onChange={toggleTheme} 
-            />
-            <span className="slider round"></span>
-          </label>
+          <input
+            type="checkbox"
+            checked={isDarkMode}
+            onChange={toggleTheme}
+          />
+          <span className="slider round"></span>
+        </label>
         </nav>
       </header>
 
@@ -32,7 +34,7 @@ function Home({ onNavigate, isDarkMode, toggleTheme }: HomeProps) {
         <div className="welcome-text">
           <h1>Bem-vindo(a) a AdaTech!</h1>
           <p>Inovação que agiliza, confiança que protege.</p>
-          <button className="cta-button" onClick={onNavigate}>
+          <button className="cta-button" onClick={handleNavigate}>
             Entrar
           </button>
         </div>
@@ -42,7 +44,7 @@ function Home({ onNavigate, isDarkMode, toggleTheme }: HomeProps) {
       </main>
 
       <footer className="home-footer">
-        <a href="#" className="help-link">
+        <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="help-link">
           <FaGithub />
           <span>Preciso de ajuda</span>
         </a>
