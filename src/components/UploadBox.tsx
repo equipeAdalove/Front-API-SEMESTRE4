@@ -3,28 +3,41 @@ import { FaFilePdf, FaCheck, FaTimes, FaDownload } from "react-icons/fa";
 type UploadBoxProps = {
   file: File | null;
   loading: boolean;
+  // Props adicionadas do seu segundo arquivo
   downloadUrl: string | null;
   downloadName: string;
+
   onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
   onRemove: () => void;
   onUpload: () => void;
+  // Prop adicionada do seu segundo arquivo
   onDownload: () => void;
+
+  // Props do seu primeiro arquivo
+  uploadButtonText?: string;
+  showUploadButton?: boolean;
 };
 
 function UploadBox({
   file,
   loading,
+  // Props adicionadas
   downloadUrl,
   downloadName,
   onFileSelect,
   onDrop,
   onRemove,
   onUpload,
+  // Prop adicionada
   onDownload,
+  // Props do primeiro arquivo
+  uploadButtonText,
+  showUploadButton = true,
 }: UploadBoxProps) {
   return (
     <div className="upload-box">
+      {/* Lógica de 'dropzone' do seu segundo arquivo */}
       {!file ? (
         <div
           className="submit-document-button"
@@ -37,12 +50,17 @@ function UploadBox({
         </div>
       ) : (
         <>
+          {/* Lógica de 'sucesso' do seu primeiro arquivo */}
           <div className="submit-document-button-success">
             <div className="button-content">
               <FaFilePdf className="pdf-icon" />
-              <span>Documento pronto para envio!</span>
+              <span>
+                {showUploadButton
+                  ? "Documento pronto para envio!"
+                  : "Documento carregado:"}
+              </span>
             </div>
-            <FaCheck className="check-icon" />
+            {showUploadButton && <FaCheck className="check-icon" />}
           </div>
           <div className="uploaded-file-name">
             <span>{file.name}</span>
@@ -50,9 +68,19 @@ function UploadBox({
               <FaTimes />
             </button>
           </div>
-          <button onClick={onUpload} disabled={loading} className="export-button">
-            {loading ? "Processando..." : "Enviar PDF"}
-          </button>
+
+          {/* Botão de Upload condicional do seu primeiro arquivo */}
+          {showUploadButton && (
+            <button
+              onClick={onUpload}
+              disabled={loading}
+              className="export-button"
+            >
+              {loading ? "Processando..." : uploadButtonText || "Enviar PDF"}
+            </button>
+          )}
+
+          {/* Botão de Download adicionado do seu segundo arquivo */}
           {downloadUrl && (
             <button onClick={onDownload} className="export-button">
               <FaDownload /> Baixar Resultado
@@ -61,6 +89,7 @@ function UploadBox({
         </>
       )}
 
+      {/* Input 'hidden' do seu segundo arquivo */}
       <input
         id="pdf-upload"
         type="file"
