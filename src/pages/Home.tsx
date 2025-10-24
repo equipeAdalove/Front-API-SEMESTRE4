@@ -32,7 +32,7 @@ function Home({ isDarkMode, toggleTheme }: HomeProps) {
 
       <main className="home-main-content">
         <div className="welcome-text">
-          <h1>Bem-vindo(a) a AdaTech!</h1>
+          <h1>Bem-vindo(a) à AdaTech!</h1>
           <p>Inovação que agiliza, confiança que protege.</p>
           <button className="cta-button" onClick={handleNavigate}>
             Entrar

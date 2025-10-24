@@ -1001,3 +1001,137 @@ a:hover {
   position: relative;
   overflow: hidden;
 }
+
+/* ============================================= */
+/* == ESTILOS COMPLETOS DO FORMULÁRIO == */
+/* ============================================= */
+
+/* Wrapper principal para as seções de validação (do CSS novo) */
+.validation-section {
+  margin-bottom: 2rem;
+}
+
+/* Wrapper antigo, que você talvez ainda use (do CSS original) */
+.data-preview-section {
+  background-color: var(--container-bg-color);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-top: 1rem;
+  transition: background-color 0.3s;
+}
+
+/* Título da seção (do CSS original) */
+.data-preview-section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+/* Grid do formulário principal (Validação Final) (do CSS original) */
+.data-form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+/* Grid do formulário de extração (Part Number + Descrição) (do CSS novo) */
+.data-form-extraction {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* "Container" para Label + Input (do CSS original) */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Classe especial para o campo de descrição ocupar mais espaço (do CSS original) */
+.form-group.description-group {
+  grid-column: 2 / 3;
+  grid-row: 1 / 4;
+}
+
+/* Label (título) de cada campo (do CSS original) */
+.form-label {
+  font-size: 0.9rem;
+  color: var(--secondary-text-color);
+}
+
+/* Input padrão (do CSS original) */
+.form-input {
+  background-color: var(--form-input-bg);
+  border: 1px solid var(--form-input-border);
+  border-radius: 8px;
+  padding: 0.8rem;
+  color: var(--form-input-text);
+  font-family: 'Poppins', sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+/* Textarea grande (Validação Final) (do CSS original) */
+.form-textarea {
+  background-color: var(--form-input-bg);
+  border: 1px solid var(--form-input-border);
+  border-radius: 8px;
+  padding: 0.8rem;
+  color: var(--form-input-text);
+  font-family: 'Poppins', sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 200px;
+  resize: vertical;
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+/* Textarea pequena (Validação de Extração) (do CSS novo) */
+.form-textarea-small {
+  background-color: var(--form-input-bg);
+  border: 1px solid var(--form-input-border);
+  border-radius: 8px;
+  padding: 0.8rem;
+  color: var(--form-input-text);
+  font-family: 'Poppins', sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* Texto de ajuda abaixo de um campo (do CSS original) */
+.form-note {
+  font-size: 0.75rem;
+  color: var(--secondary-text-color);
+  margin-top: 4px;
+}
+
+/* Texto "É possível editar os campos!" (do CSS original) */
+.editable-note {
+  font-size: 0.9rem;
+  color: var(--primary-text-color);
+  margin-top: 1.5rem;
+  text-align: left;
+}
+
+/* Botão de "Processar" / "Confirmar e Exportar" (do CSS original) */
+.export-button {
+  background-color: var(--button-color);
+  color: white;
+  border: none;
+  padding: 15px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-top: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.export-button:hover {
+background-color: var(--button-hover-color);
+}
