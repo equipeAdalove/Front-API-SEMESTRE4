@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "../index.css";
+import { useAuth } from "../context/AuthContext";
 
 type LoginProps = {
   isDarkMode: boolean;
@@ -10,7 +11,7 @@ type LoginProps = {
 const API_URL = "http://localhost:8000/api";
 
 function Login({ isDarkMode, toggleTheme }: LoginProps) {
-  const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -32,7 +33,7 @@ function Login({ isDarkMode, toggleTheme }: LoginProps) {
       formData.append('username', email);
       formData.append('password', password);
 
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const response = await fetch(`${API_URL}/token`, { 
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: formData.toString(),
@@ -44,10 +45,9 @@ function Login({ isDarkMode, toggleTheme }: LoginProps) {
         throw new Error(data.detail || "E-mail ou senha inválidos.");
       }
       
-      if (data.data && data.data.access_token) {
-        localStorage.setItem("authToken", data.data.access_token);
+if (data.access_token) { 
         
-        navigate("/principal"); 
+        login(data.access_token, email);
 
       } else {
         throw new Error("Token de acesso não encontrado na resposta.");

@@ -1,5 +1,6 @@
-import { FaBars, FaUserCircle } from "react-icons/fa";
+import { FaBars, FaUserCircle, FaSignOutAlt } from "react-icons/fa"; 
 import { LuToggleLeft, LuToggleRight } from "react-icons/lu";
+import { useAuth } from "../context/AuthContext"; 
 import "../index.css"; 
 
 type HeaderProps = {
@@ -9,6 +10,8 @@ type HeaderProps = {
 };
 
 function Header({ isDarkMode, toggleTheme, onProfileClick }: HeaderProps) {
+  const { isAuthenticated, logout } = useAuth(); 
+  
   return (
     <header className="profile-header"> 
       <FaBars size={24} className="menu-icon" />
@@ -26,11 +29,21 @@ function Header({ isDarkMode, toggleTheme, onProfileClick }: HeaderProps) {
             onClick={toggleTheme} 
           />
         )}
+        
         <FaUserCircle 
           size={32} 
           className="profile-icon" 
           onClick={onProfileClick} 
         />
+        
+        {isAuthenticated && (
+          <FaSignOutAlt
+            size={28}
+            className="icon logout-icon"
+            onClick={logout}
+            style={{ cursor: 'pointer', marginLeft: '10px' }} 
+          />
+        )}
       </div>
     </header>
   );
