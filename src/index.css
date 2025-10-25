@@ -1125,7 +1125,7 @@ a:hover {
   font-family: 'Poppins', sans-serif;
   width: 100%;
   box-sizing: border-box;
-  min-height: 80px; /* Altura menor para a descrição bruta */
+  min-height: 80px;
   resize: vertical;
 }
 
@@ -1179,11 +1179,11 @@ a:hover {
 .page-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* ocupa toda a altura da tela */
+  min-height: 100vh; 
 }
 
 .main-content {
-  flex: 1; /* faz o conteúdo empurrar o footer para baixo */
+  flex: 1; 
 }
 
 .page-container {
@@ -1196,15 +1196,49 @@ a:hover {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* centraliza o conteúdo na tela */
+  justify-content: center;
 }
 
 .app-footer {
   margin-top: auto;
   background-color: var(--container-bg-color);
   padding: 1rem 2rem;
-  padding-bottom: 1.5rem; /* dá mais respiro no rodapé */
+  padding-bottom: 1.5rem; 
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.new-process-button {
+  background-color: var(--button-color); 
+  color: white;
+  border: none;
+  padding: 0.9rem 1.7rem; 
+  border-radius: 8px;
+  cursor: pointer;
+  width: auto; 
+  font-size: 0.9rem; 
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  margin-left: 0.5rem; 
+}
+
+.new-process-button:hover {
+  background-color: var(--button-hover-color); 
+}
+
+.new-process-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.save-db {
+  background-color: transparent;
+  color: var(--button-color);
+  border: 1px solid var(--button-color);
+}
+
+.save-db:hover {
+  background-color: var(--button-color);
+  color: #ffffff; 
 }
