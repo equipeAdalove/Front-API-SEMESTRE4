@@ -1,5 +1,8 @@
+// Arquivo: src/App.tsx
+
 import { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+// 1. Remova 'BrowserRouter as Router' da importação
+import { Routes, Route } from "react-router-dom";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -20,29 +23,29 @@ function App() {
   }, [isDarkMode]);
 
   return (
-    <Router>
-      <Routes>
-        <Route
-          path="/"
-          element={<Home isDarkMode={isDarkMode} toggleTheme={toggleTheme} />}
-        />
-        <Route
-          path="/login"
-          element={<Login isDarkMode={isDarkMode} toggleTheme={toggleTheme} />}
-        />
-        <Route 
-          path="/signup" 
-          element={<SignUp isDarkMode={isDarkMode} toggleTheme={toggleTheme} />} 
-        />
+    // 2. Remova o componente <Router> que envolvia as rotas
+    <Routes>
+      <Route
+        path="/"
+        element={<Home isDarkMode={isDarkMode} toggleTheme={toggleTheme} />}
+      />
+      <Route
+        path="/login"
+        element={<Login isDarkMode={isDarkMode} toggleTheme={toggleTheme} />}
+      />
+      <Route 
+        path="/signup" 
+        element={<SignUp isDarkMode={isDarkMode} toggleTheme={toggleTheme} />} 
+      />
 
-        <Route element={<ProtectedRoute />}>
-          <Route element={<MainLayout isDarkMode={isDarkMode} toggleTheme={toggleTheme} />}>
-            <Route path="/principal" element={<Tela_Principal />} />
-            <Route path="/perfil" element={<Perfil />} />
-          </Route>
+      <Route element={<ProtectedRoute />}>
+        <Route element={<MainLayout isDarkMode={isDarkMode} toggleTheme={toggleTheme} />}>
+          <Route path="/principal" element={<Tela_Principal />} />
+          <Route path="/perfil" element={<Perfil />} />
         </Route>
-      </Routes>
-    </Router>
+      </Route>
+    </Routes>
+    // 3. Remova o fechamento do </Router>
   );
 }
 
