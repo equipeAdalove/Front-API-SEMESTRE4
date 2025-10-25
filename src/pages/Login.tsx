@@ -33,7 +33,7 @@ function Login({ isDarkMode, toggleTheme }: LoginProps) {
       formData.append('username', email);
       formData.append('password', password);
 
-      const response = await fetch(`${API_URL}/token`, { 
+      const response = await fetch(`${API_URL}/auth/login`, { 
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: formData.toString(),
@@ -45,9 +45,9 @@ function Login({ isDarkMode, toggleTheme }: LoginProps) {
         throw new Error(data.detail || "E-mail ou senha inválidos.");
       }
       
-if (data.access_token) { 
+if (data.data && data.data.access_token) { 
         
-        login(data.access_token, email);
+        login(data.data.access_token, email);
 
       } else {
         throw new Error("Token de acesso não encontrado na resposta.");
