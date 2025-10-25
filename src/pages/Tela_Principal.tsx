@@ -16,7 +16,7 @@ type UIState =
   | "extracted"
   | "processing"
   | "processed"
-  | "exporting"
+  | "exporting" // Reutilizado para 'saving' e 'exporting'
   | "downloaded";
 
 function Tela_Principal() {
@@ -27,6 +27,7 @@ function Tela_Principal() {
   const [extractedItems, setExtractedItems] = useState<ExtractedItem[]>([]);
   const [processedItems, setProcessedItems] = useState<ProcessedItem[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null); // <<< NOVO ESTADO
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -38,7 +39,7 @@ function Tela_Principal() {
   const isLoading =
     uiState === "extracting" ||
     uiState === "processing" ||
-    uiState === "exporting";
+    uiState === "exporting"; // Agora inclui 'saving'
 
   const resetState = () => {
     setFile(null);
@@ -46,6 +47,7 @@ function Tela_Principal() {
     setExtractedItems([]);
     setProcessedItems([]);
     setError(null);
+    setSaveMessage(null); // <<< Resetar mensagem de salvamento
     const fileInput = document.getElementById("pdf-upload") as HTMLInputElement;
     if (fileInput) fileInput.value = "";
   };
@@ -54,6 +56,7 @@ function Tela_Principal() {
     if (!file) return;
     setUiState("extracting");
     setError(null);
+    setSaveMessage(null); // <<< Limpar msg ao re-extrair
     const formData = new FormData();
     formData.append("file", file);
     try {
@@ -70,13 +73,14 @@ function Tela_Principal() {
       setUiState("extracted");
     } catch (err: any) {
       setError(err.message || "Ocorreu um erro desconhecido.");
-      setUiState("initial"); 
+      setUiState("initial");
     }
   };
 
   const handleProcess = async () => {
     setUiState("processing");
     setError(null);
+    setSaveMessage(null); // <<< Limpar msg ao re-processar
     try {
       const response = await fetch("http://localhost:8000/api/process_items", {
         method: "POST",
@@ -92,7 +96,7 @@ function Tela_Principal() {
       setUiState("processed");
     } catch (err: any) {
       setError(err.message);
-      setUiState("extracted"); 
+      setUiState("extracted");
     }
   };
 
@@ -100,6 +104,7 @@ function Tela_Principal() {
     if (processedItems.length === 0) return;
     setUiState("exporting");
     setError(null);
+    setSaveMessage(null); // <<< Limpar msg ao exportar
     try {
       const response = await fetch("http://localhost:8000/api/generate_excel", {
         method: "POST",
@@ -115,12 +120,85 @@ function Tela_Principal() {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-      setUiState("downloaded"); // Estado de sucesso
+      setUiState("downloaded");
     } catch (err: any) {
       setError(err.message);
+      setUiState("processed");
+    }
+  };
+
+  // --- NOVA FUNÇÃO handleSaveToDB ---
+  const handleSaveToDB = async () => {
+    if (processedItems.length === 0) return;
+
+    setUiState("exporting"); // Reutiliza o estado de loading
+    setError(null);
+    setSaveMessage(null);
+
+    const token = localStorage.getItem("authToken"); // Pega o token para autenticação
+
+    if (!token) {
+      setError("Usuário não autenticado. Faça login novamente.");
+      setUiState("processed");
+      navigate("/login"); // Redireciona para login se não houver token
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8000/api/save_items", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}` // Envia o token
+        },
+        body: JSON.stringify({ items: processedItems }),
+      });
+
+      // Checa se a resposta tem conteúdo antes de tentar parsear JSON
+      const responseBody = await response.text(); // Lê como texto primeiro
+      let data;
+      if (responseBody) {
+          try {
+              data = JSON.parse(responseBody); // Tenta parsear se houver texto
+          } catch (jsonError) {
+              console.error("Erro ao parsear JSON da resposta:", jsonError);
+              // Decide como tratar: pode ser um erro ou a resposta pode ser só texto
+              if (!response.ok) { // Se a resposta não for OK e não for JSON, joga um erro genérico
+                throw new Error("Erro no servidor: Resposta inválida.");
+              }
+              // Se a resposta for OK mas não JSON, talvez seja só uma mensagem de texto
+              data = { message: responseBody };
+          }
+      } else if (!response.ok) {
+          // Se a resposta não for OK e não tiver corpo, joga erro com base no status
+          throw new Error(`Erro no servidor: Status ${response.status}`);
+      }
+
+
+      if (!response.ok) {
+        // Trata erro de autenticação especificamente
+        if (response.status === 401) {
+            setError("Sessão expirada ou inválida. Faça login novamente.");
+            localStorage.removeItem("authToken"); // Remove token inválido
+            navigate("/login");
+        } else {
+             // Usa a mensagem de 'detail' se existir no JSON parseado, senão erro genérico
+            throw new Error(data?.detail || `Erro ao salvar: Status ${response.status}`);
+        }
+      } else {
+           // Usa a mensagem do JSON parseado ou um fallback
+          setSaveMessage(data?.message || "Itens salvos com sucesso!");
+          // Mantém o estado em "processed" para o usuário poder baixar o Excel
+          setUiState("processed");
+      }
+
+    } catch (err: any) {
+      console.error("Erro na função handleSaveToDB:", err); // Log detalhado do erro
+      setError(err.message || "Ocorreu um erro ao tentar salvar."); // Exibe a mensagem de erro
       setUiState("processed"); // Volta para processado em caso de erro
     }
   };
+  // --- FIM DA NOVA FUNÇÃO ---
 
   const handleExtractedChange = (
     index: number,
@@ -130,6 +208,7 @@ function Tela_Principal() {
     const updated = [...extractedItems];
     updated[index] = { ...updated[index], [field]: value };
     setExtractedItems(updated);
+    setSaveMessage(null); // <<< Limpar msg se editar
   };
 
   const handleProcessedChange = (
@@ -140,6 +219,7 @@ function Tela_Principal() {
     const updated = [...processedItems];
     updated[index] = { ...updated[index], [field]: value };
     setProcessedItems(updated);
+    setSaveMessage(null); // <<< Limpar msg se editar
   };
 
   const handleViewData = () => {
@@ -152,11 +232,12 @@ function Tela_Principal() {
     const f = e.target.files?.[0];
     if (f && f.type === "application/pdf") {
       setFile(f);
-      // Reseta o estado (lógica do v2)
+      // Reseta o estado
       setUiState("initial");
       setExtractedItems([]);
       setProcessedItems([]);
       setError(null);
+      setSaveMessage(null); // <<< Resetar msg
     }
   };
 
@@ -165,11 +246,12 @@ function Tela_Principal() {
     const f = e.dataTransfer.files[0];
     if (f && f.type === "application/pdf") {
       setFile(f);
-      // Reseta o estado (lógica do v2)
+      // Reseta o estado
       setUiState("initial");
       setExtractedItems([]);
       setProcessedItems([]);
       setError(null);
+      setSaveMessage(null); // <<< Resetar msg
     }
   };
 
@@ -177,9 +259,6 @@ function Tela_Principal() {
   const handleRemoveFile = () => {
     resetState();
   };
-
-  // handleUpload e handleDownload foram removidos pois sua lógica
-  // foi substituída por handleExtract, handleProcess e handleExport
 
   return (
     <div className="page-container">
@@ -193,19 +272,17 @@ function Tela_Principal() {
               <p>Como posso ajudar?</p>
             </div>
 
-            {/* --- Bloco UploadBox/Loader do v2 --- */}
             {!isLoading ? (
               <UploadBox
                 file={file}
-                loading={false} // 'loading' principal é o 'isLoading'
-                downloadUrl={null} // Não é mais usado neste fluxo
-                downloadName={""} // Não é mais usado neste fluxo
+                loading={false}
+                downloadUrl={null}
+                downloadName={""}
                 onFileSelect={handleFileSelect}
                 onDrop={handleDrop}
                 onRemove={handleRemoveFile}
-                onUpload={handleExtract} // Chama a extração
-                onDownload={() => {}} // Botão de download não é mais usado aqui
-                // Props do v2
+                onUpload={handleExtract}
+                onDownload={() => {}}
                 uploadButtonText={
                   file ? "Extrair Dados do PDF" : "Enviar PDF"
                 }
@@ -215,10 +292,12 @@ function Tela_Principal() {
               <Loader />
             )}
 
-            {error && <p className="error-message">{error}</p>}
+            {/* Exibe erro geral ou mensagem de salvamento */}
+            {error && <p className="error-message" style={{ color: 'red', marginTop: '1rem' }}>{error}</p>}
+            {saveMessage && !error && <p className="success-message" style={{ color: 'green', marginTop: '1rem', fontWeight: 'bold' }}>{saveMessage}</p>}
             {/* ------------------------------------- */}
 
-            {/* Condicional do disclaimer atualizada */}
+
             {uiState === "initial" && !file && (
               <p className="disclaimer">
                 A IA pode cometer erros. Considere verificar informações
@@ -228,18 +307,19 @@ function Tela_Principal() {
           </div>
         </div>
 
-        {/* --- SEÇÕES DE FORMULÁRIO ADICIONADAS DO v2 --- */}
+        {/* --- SEÇÃO DE VALIDAÇÃO DA EXTRAÇÃO --- */}
         {uiState === "extracted" && !isLoading && (
           <section className="validation-section">
-            <h2 className="data-preview-section-h2">Validação da Extração:</h2>
+            {/* Use h2 ou similar para títulos */}
+            <h2>Validação da Extração:</h2>
             <p className="editable-note">
               Verifique e corrija os Part Numbers e descrições extraídos antes
               de continuar.
             </p>
-            <div className="form-list-grid">
+            <div className="form-list-grid"> {/* Use uma classe consistente se aplicável */}
               {extractedItems.map((item, index) => (
                 <ExtractionFormSection
-                  key={index}
+                  key={index} // Chave deve estar no elemento raiz do map
                   item={item}
                   index={index}
                   onItemChange={handleExtractedChange}
@@ -249,20 +329,25 @@ function Tela_Principal() {
             <button
               onClick={handleProcess}
               disabled={isLoading}
-              className="export-button"
+              className="export-button" // Reutilize classes ou crie novas conforme necessário
             >
               Processar Itens Corrigidos
             </button>
           </section>
         )}
 
+        {/* --- SEÇÃO DE VALIDAÇÃO FINAL --- */}
         {uiState === "processed" && !isLoading && (
           <section className="validation-section">
-            <h2 className="data-preview-section-h2">Validação Final:</h2>
-            <div className="form-list-grid">
+             {/* Use h2 ou similar para títulos */}
+            <h2>Validação Final:</h2>
+
+             {/* Mensagem de sucesso/erro já está fora desta seção, mais acima */}
+
+            <div className="form-list-grid"> {/* Use uma classe consistente */}
               {processedItems.map((item, index) => (
                 <FormSection
-                  key={index}
+                  key={index} // Chave deve estar no elemento raiz do map
                   item={item}
                   index={index}
                   onItemChange={handleProcessedChange}
@@ -270,52 +355,69 @@ function Tela_Principal() {
               ))}
             </div>
             <p className="editable-note">É possível editar os campos!</p>
+
+            {/* --- BOTÕES DE SALVAR E EXPORTAR --- */}
+            <button
+              onClick={handleSaveToDB}
+              disabled={isLoading}
+              // Use className="export-button" ou crie className="save-button"
+              className="export-button"
+              style={{ marginRight: '1rem' }} // Exemplo de espaçamento
+            >
+              Salvar Alterações no Banco
+            </button>
+
             <button
               onClick={handleExport}
               disabled={isLoading}
               className="export-button"
             >
-              Confirmar e exportar em formato .xlsx
+              Confirmar e exportar .xlsx
             </button>
+            {/* ----------------------------------- */}
           </section>
         )}
 
+        {/* --- SEÇÃO DOWNLOAD CONCLUÍDO --- */}
         {uiState === "downloaded" && !isLoading && (
-          <section className="download-success-section">
-            <FaCheckCircle className="success-icon" />
+          <section className="download-success-section" style={{ textAlign: 'center', marginTop: '2rem' }}> {/* Estilos inline para exemplo */}
+            <FaCheckCircle className="success-icon" style={{ fontSize: '3rem', color: 'green', marginBottom: '1rem' }} />
+             {/* Use h2 ou similar para títulos */}
             <h2>Download concluído com sucesso!</h2>
-            <button onClick={handleViewData} className="view-data-button">
-              Visualizar Dados
+            <button onClick={handleViewData} className="view-data-button" style={{ marginRight: '1rem' }}> {/* Estilos inline */}
+              Visualizar Dados Salvos
             </button>
+            {/* Botão extra para iniciar um novo processo */}
+            <button onClick={resetState} className="new-process-button"> {/* Estilos inline */}
+                Iniciar Novo Processo
+            </button>
+             {/* Adicione estilos para view-data-button e new-process-button no CSS */}
           </section>
         )}
         {/* --- FIM DAS SEÇÕES ADICIONADAS --- */}
 
-        {/* Condicional da 'mission-section' atualizada */}
+
+        {/* --- SEÇÃO MISSÃO (Mostrada apenas no início) --- */}
         {uiState === "initial" && !file && (
           <section className="mission-section">
             <p>
               Minha missão é automatizar a criação da instrução de registro
-              aduaneiro, garantindo que ela seja clara, completa e em
-              conformidade com as exigências legais.
+              aduaneiro...
             </p>
             <p>Para isso, eu:</p>
             <ul>
               <li>
-                Organizo e relaciono dados essenciais como Part-Number, NCM,
-                fabricante e origem completa (com endereço)
+                Organizo e relaciono dados essenciais...
               </li>
               <li>
-                Gero descrições precisas dos produtos, evitando ambiguidades;
+                Gero descrições precisas...
               </li>
               <li>
-                Asseguro que a documentação seja compreensível para a Receita
-                Federal, reduzindo o risco de multas ou penalidades.
+                Asseguro que a documentação seja compreensível...
               </li>
             </ul>
             <p>
-              Meu objetivo é simplificar esse processo, tornando-o mais rápido,
-              confiável e livre de erros.
+              Meu objetivo é simplificar esse processo...
             </p>
           </section>
         )}
