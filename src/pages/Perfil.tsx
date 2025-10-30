@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Footer from "../components/Footer";
 
 const API_URL = "http://localhost:8000/api";
 
@@ -102,7 +101,6 @@ function Perfil() {
           Meu objetivo é simplificar esse processo, tornando-o mais rápido, confiável e livre de erros.
         </p>
       </div>
-      <Footer />
     </>
   );
 }

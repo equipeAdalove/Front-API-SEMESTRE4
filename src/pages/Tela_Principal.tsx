@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import adatech from "../assets/Polvo_AdaTech.png";
 import UploadBox from "../components/UploadBox";
-import Footer from "../components/Footer";
 
 import ExtractionFormSection from "../components/ExtractionFormSection";
 import FormSection from "../components/FormSection";
@@ -54,20 +53,41 @@ function Tela_Principal() {
 
   const handleExtract = async () => {
     if (!file) return;
+
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      setError("Usuário não autenticado. Faça login novamente.");
+      setUiState("initial"); 
+      navigate("/login");
+      return;
+    }
+
     setUiState("extracting");
     setError(null);
-    setSaveMessage(null); 
+    setSaveMessage(null);
     const formData = new FormData();
     formData.append("file", file);
+
     try {
       const response = await fetch("http://localhost:8000/api/extract_from_pdf", {
         method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        },
         body: formData,
       });
+
       if (!response.ok) {
+        if (response.status === 401) {
+            setError("Sessão expirada ou inválida. Faça login novamente.");
+            localStorage.removeItem("authToken");
+            navigate("/login");
+            return; 
+        }
         const errorData = await response.json();
         throw new Error(errorData.detail || "Erro na extração do PDF");
       }
+      
       const data: ExtractedItem[] = await response.json();
       setExtractedItems(data);
       setUiState("extracted");
@@ -81,13 +101,34 @@ function Tela_Principal() {
     setUiState("processing");
     setError(null);
     setSaveMessage(null); 
+
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      setError("Usuário não autenticado. Faça login novamente.");
+      setUiState("extracted"); 
+      navigate("/login");
+      return;
+    }
+
     try {
       const response = await fetch("http://localhost:8000/api/process_items", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}` 
+        },
         body: JSON.stringify({ items: extractedItems }),
       });
+
       if (!response.ok) {
+        if (response.status === 401) {
+            setError("Sessão expirada ou inválida. Faça login novamente.");
+            localStorage.removeItem("authToken");
+            navigate("/login");
+            setUiState("extracted"); 
+            return; 
+        }
         const errorData = await response.json();
         throw new Error(errorData.detail || "Erro no processamento dos itens.");
       }
@@ -102,16 +143,40 @@ function Tela_Principal() {
 
   const handleExport = async () => {
     if (processedItems.length === 0) return;
+
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      setError("Usuário não autenticado. Faça login novamente.");
+      setUiState("processed"); 
+      navigate("/login");
+      return;
+    }
+
     setUiState("exporting");
     setError(null);
     setSaveMessage(null); 
     try {
       const response = await fetch("http://localhost:8000/api/generate_excel", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}` 
+        },
         body: JSON.stringify({ items: processedItems }),
       });
-      if (!response.ok) throw new Error("Erro ao gerar o arquivo Excel.");
+
+      if (!response.ok) {
+          if (response.status === 401) {
+            setError("Sessão expirada ou inválida. Faça login novamente.");
+            localStorage.removeItem("authToken");
+            navigate("/login");
+            setUiState("processed"); 
+            return; 
+        }
+        throw new Error("Erro ao gerar o arquivo Excel.");
+      }
+      
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -392,8 +457,6 @@ function Tela_Principal() {
           </section>
         )}
       </main>
-
-      <Footer />
     </div>
   );
 }
