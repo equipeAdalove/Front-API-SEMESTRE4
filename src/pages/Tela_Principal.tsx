@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import adatech from "../assets/Polvo_AdaTech.png";
 import UploadBox from "../components/UploadBox";
+import { toast } from 'react-toastify';
 
 import ExtractionFormSection from "../components/ExtractionFormSection";
 import FormSection from "../components/FormSection";
@@ -56,7 +57,8 @@ function Tela_Principal() {
 
     const token = localStorage.getItem("authToken");
     if (!token) {
-      setError("Usuário não autenticado. Faça login novamente.");
+      //setError("Usuário não autenticado. Faça login novamente.");
+      toast.error("Usuário não autenticado. Faça login novamente.");
       setUiState("initial"); 
       navigate("/login");
       return;
@@ -79,7 +81,8 @@ function Tela_Principal() {
 
       if (!response.ok) {
         if (response.status === 401) {
-            setError("Sessão expirada ou inválida. Faça login novamente.");
+            //setError("Sessão expirada ou inválida. Faça login novamente.");
+            toast.error("Sessão expirada ou inválida. Faça login novamente.");
             localStorage.removeItem("authToken");
             navigate("/login");
             return; 
@@ -92,7 +95,8 @@ function Tela_Principal() {
       setExtractedItems(data);
       setUiState("extracted");
     } catch (err: any) {
-      setError(err.message || "Ocorreu um erro desconhecido.");
+      toast.error(err.message || "Ocorreu um erro desconhecido.");
+      setError(err.message)
       setUiState("initial");
     }
   };
@@ -105,7 +109,8 @@ function Tela_Principal() {
     const token = localStorage.getItem("authToken");
 
     if (!token) {
-      setError("Usuário não autenticado. Faça login novamente.");
+      //setError("Usuário não autenticado. Faça login novamente.");
+      toast.error("Usuário não autenticado. Faça login novamente.");
       setUiState("extracted"); 
       navigate("/login");
       return;
@@ -123,7 +128,8 @@ function Tela_Principal() {
 
       if (!response.ok) {
         if (response.status === 401) {
-            setError("Sessão expirada ou inválida. Faça login novamente.");
+            //setError("Sessão expirada ou inválida. Faça login novamente.");
+            toast.error("Sessão expirada ou inválida. Faça login novamente.");
             localStorage.removeItem("authToken");
             navigate("/login");
             setUiState("extracted"); 
@@ -136,6 +142,7 @@ function Tela_Principal() {
       setProcessedItems(data);
       setUiState("processed");
     } catch (err: any) {
+      toast.error(err.message || "Erro no processamento.");
       setError(err.message);
       setUiState("extracted");
     }
@@ -147,7 +154,8 @@ function Tela_Principal() {
     const token = localStorage.getItem("authToken");
 
     if (!token) {
-      setError("Usuário não autenticado. Faça login novamente.");
+      //setError("Usuário não autenticado. Faça login novamente.");
+      toast.error("Usuário não autenticado. Faça login novamente.");
       setUiState("processed"); 
       navigate("/login");
       return;
@@ -168,7 +176,8 @@ function Tela_Principal() {
 
       if (!response.ok) {
           if (response.status === 401) {
-            setError("Sessão expirada ou inválida. Faça login novamente.");
+            //setError("Sessão expirada ou inválida. Faça login novamente.");
+            toast.error("Sessão expirada ou inválida. Faça login novamente.");
             localStorage.removeItem("authToken");
             navigate("/login");
             setUiState("processed"); 
@@ -187,6 +196,7 @@ function Tela_Principal() {
       window.URL.revokeObjectURL(url);
       setUiState("downloaded");
     } catch (err: any) {
+      toast.error(err.message || "Erro ao gerar Excel.");
       setError(err.message);
       setUiState("processed");
     }
@@ -202,7 +212,8 @@ function Tela_Principal() {
     const token = localStorage.getItem("authToken"); 
 
     if (!token) {
-      setError("Usuário não autenticado. Faça login novamente.");
+      //setError("Usuário não autenticado. Faça login novamente.");
+      toast.error("Usuário não autenticado. Faça login novamente.");
       setUiState("processed");
       navigate("/login"); 
       return;
@@ -237,20 +248,23 @@ function Tela_Principal() {
 
       if (!response.ok) {
         if (response.status === 401) {
-            setError("Sessão expirada ou inválida. Faça login novamente.");
+            //setError("Sessão expirada ou inválida. Faça login novamente.");
+            toast.error("Sessão expirada ou inválida. Faça login novamente.");
             localStorage.removeItem("authToken"); 
             navigate("/login");
         } else {
             throw new Error(data?.detail || `Erro ao salvar: Status ${response.status}`);
         }
       } else {
-          setSaveMessage(data?.message || "Itens salvos com sucesso!");
+          //setSaveMessage(data?.message || "Itens salvos com sucesso!");
+          toast.success(data?.message || "Itens salvos com sucesso!"); // Adicione esta linha
           setUiState("processed");
       }
 
     } catch (err: any) {
       console.error("Erro na função handleSaveToDB:", err); 
-      setError(err.message || "Ocorreu um erro ao tentar salvar."); 
+      //setError(err.message || "Ocorreu um erro ao tentar salvar."); 
+      toast.error(err.message || "Ocorreu um erro ao tentar salvar.");
       setUiState("processed"); 
     }
   };
@@ -344,7 +358,7 @@ function Tela_Principal() {
               <Loader />
             )}
 
-            {error && <p className="error-message" style={{ color: 'red', marginTop: '1rem' }}>{error}</p>}
+            {/*error && <p className="error-message" style={{ color: 'red', marginTop: '1rem' }}>{error}</p>*/}
             {saveMessage && !error && <p className="success-message" style={{ color: 'green', marginTop: '1rem', fontWeight: 'bold' }}>{saveMessage}</p>}
 
 

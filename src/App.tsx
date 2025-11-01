@@ -1,8 +1,10 @@
 // Arquivo: src/App.tsx
 
 import { useState, useEffect } from "react";
-// 1. Remova 'BrowserRouter as Router' da importação
 import { Routes, Route } from "react-router-dom";
+// 1. Importe o react-toastify
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -23,29 +25,44 @@ function App() {
   }, [isDarkMode]);
 
   return (
-    // 2. Remova o componente <Router> que envolvia as rotas
-    <Routes>
-      <Route
-        path="/"
-        element={<Home isDarkMode={isDarkMode} toggleTheme={toggleTheme} />}
-      />
-      <Route
-        path="/login"
-        element={<Login isDarkMode={isDarkMode} toggleTheme={toggleTheme} />}
-      />
-      <Route 
-        path="/signup" 
-        element={<SignUp isDarkMode={isDarkMode} toggleTheme={toggleTheme} />} 
+    // 2. O <Routes> precisa estar dentro de um Fragmento ou div
+    <>
+      {/* 3. Adicione o ToastContainer aqui */}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme={isDarkMode ? "dark" : "light"} // Vincula ao tema do app
       />
 
-      <Route element={<ProtectedRoute />}>
-        <Route element={<MainLayout isDarkMode={isDarkMode} toggleTheme={toggleTheme} />}>
-          <Route path="/principal" element={<Tela_Principal />} />
-          <Route path="/perfil" element={<Perfil />} />
+      <Routes>
+        <Route
+          path="/"
+          element={<Home isDarkMode={isDarkMode} toggleTheme={toggleTheme} />}
+        />
+        <Route
+          path="/login"
+          element={<Login isDarkMode={isDarkMode} toggleTheme={toggleTheme} />}
+        />
+        <Route 
+          path="/signup" 
+          element={<SignUp isDarkMode={isDarkMode} toggleTheme={toggleTheme} />} 
+        />
+
+        <Route element={<ProtectedRoute />}>
+          <Route element={<MainLayout isDarkMode={isDarkMode} toggleTheme={toggleTheme} />}>
+            <Route path="/principal" element={<Tela_Principal />} />
+            <Route path="/perfil" element={<Perfil />} />
+          </Route>
         </Route>
-      </Route>
-    </Routes>
-    // 3. Remova o fechamento do </Router>
+      </Routes>
+    </>
   );
 }
 

@@ -22,6 +22,11 @@
   --text-link:#21109F;
   --input-background:#ccd0d5;
   --modo: #FFFFFF;
+  --toastify-color-light: var(--background-color);
+  --toastify-color-dark: #2A215A; 
+  --toastify-color-error: #e74c3c;
+  --toastify-text-color-light: var(--primary-text-color);
+  --toastify-text-color-dark: #FFFFFF;
 }
 
 [data-theme='dark'] {
@@ -1241,4 +1246,29 @@ a:hover {
 .save-db:hover {
   background-color: var(--button-color);
   color: #ffffff; 
+}
+
+.Toastify__toast {
+  font-family: 'Poppins', sans-serif;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.Toastify__toast-theme--dark {
+  background: var(--toastify-color-dark) !important;
+  color: var(--toastify-text-color-dark);
+}
+
+.Toastify__toast-theme--light {
+  background: var(--toastify-color-light) !important;
+  color: var(--toastify-text-color-light);
+  border: 1px solid var(--container-bg-color);
+}
+
+.Toastify__close-button--light {
+  color: var(--toastify-text-color-light);
+}
+
+.Toastify__close-button--dark {
+  color: var(--toastify-text-color-dark);
 }
