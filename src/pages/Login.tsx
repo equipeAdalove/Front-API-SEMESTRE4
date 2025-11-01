@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import "../index.css";
 import { useAuth } from "../context/AuthContext";
+import { toast } from 'react-toastify';
 
 type LoginProps = {
   isDarkMode: boolean;
@@ -14,15 +15,16 @@ function Login({ isDarkMode, toggleTheme }: LoginProps) {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  // const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    //setError("");
 
     if (!email.trim() || !password.trim()) {
-      setError("Por favor, preencha todos os campos!");
+      //setError("Por favor, preencha todos os campos!");
+      toast.error("Por favor, preencha todos os campos!");
       return;
     }
 
@@ -54,7 +56,8 @@ if (data.data && data.data.access_token) {
       }
 
     } catch (err: any) {
-      setError(err.message || "Ocorreu um erro ao tentar fazer login.");
+      //setError(err.message || "Ocorreu um erro ao tentar fazer login.");
+      toast.error(err.message || "Ocorreu um erro ao tentar fazer login.");
     } finally {
       setIsLoading(false);
     }
@@ -103,7 +106,7 @@ if (data.data && data.data.access_token) {
           <Link to="/recuperar-senha" className="forgot-password">
             Esqueci a senha
           </Link>
-          {error && <p className="mensagem-erro">{error}</p>}
+          {/*error && <p className="mensagem-erro">{error}</p>*/}
           <button type="submit" disabled={isLoading}>
             {isLoading ? "Entrando..." : "Entrar"}
           </button>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import '../index.css';
+import { toast } from 'react-toastify'
 
 interface SignUpProps {
   isDarkMode: boolean;
@@ -16,19 +17,21 @@ const SignUp: React.FC<SignUpProps> = ({ isDarkMode, toggleTheme }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
+  // const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    // setError('');
 
     if (!fullName || !email || !password || !confirmPassword) {
-      setError('Por favor, preencha todos os campos.');
+      //setError('Por favor, preencha todos os campos.');
+      toast.error('Por favor, preencha todos os campos.');
       return;
     }
     if (password !== confirmPassword) {
-      setError('As senhas não coincidem.');
+      //setError('As senhas não coincidem.');
+      toast.error('As senhas não coincidem.');
       return;
     }
 
@@ -52,7 +55,8 @@ const SignUp: React.FC<SignUpProps> = ({ isDarkMode, toggleTheme }) => {
 
     } catch (err: any) {
       console.error('Erro ao tentar criar conta:', err);
-      setError(err.message || 'Ocorreu um erro ao tentar criar a conta.');
+      //setError(err.message || 'Ocorreu um erro ao tentar criar a conta.');
+      toast.error(err.message || 'Ocorreu um erro ao tentar criar a conta.');
     } finally {
       setIsLoading(false);
     }
@@ -129,7 +133,7 @@ const SignUp: React.FC<SignUpProps> = ({ isDarkMode, toggleTheme }) => {
               </div>
             </div>
 
-            {error && <p className="mensagem-erro">{error}</p>}
+            {/*error && <p className="mensagem-erro">{error}</p>*/}
             
             <div className="terms-group">
               <input type="checkbox" id="terms" name="terms" required />
