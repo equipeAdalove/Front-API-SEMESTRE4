@@ -15,15 +15,12 @@ function Login({ isDarkMode, toggleTheme }: LoginProps) {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    //setError("");
 
     if (!email.trim() || !password.trim()) {
-      //setError("Por favor, preencha todos os campos!");
       toast.error("Por favor, preencha todos os campos!");
       return;
     }
@@ -47,16 +44,13 @@ function Login({ isDarkMode, toggleTheme }: LoginProps) {
         throw new Error(data.detail || "E-mail ou senha inválidos.");
       }
       
-if (data.data && data.data.access_token) { 
-        
+      if (data.data && data.data.access_token) { 
         login(data.data.access_token, email);
-
       } else {
         throw new Error("Token de acesso não encontrado na resposta.");
       }
 
     } catch (err: any) {
-      //setError(err.message || "Ocorreu um erro ao tentar fazer login.");
       toast.error(err.message || "Ocorreu um erro ao tentar fazer login.");
     } finally {
       setIsLoading(false);
@@ -65,6 +59,12 @@ if (data.data && data.data.access_token) {
 
   return (
     <div className="login-page" data-theme={isDarkMode ? "dark" : "light"}>
+       <div className="bubbles">
+        {Array.from({ length: 20 }).map((_, i) => (
+          <span key={i}></span>
+        ))}
+      </div>
+
       <header className="home-header">
         <div className="logo">
           <span>AdaTech</span>
@@ -78,6 +78,7 @@ if (data.data && data.data.access_token) {
           <span className="slider round"></span>
         </label>
       </header>
+
       <div className="login-card">
         <h1>Bem-vindo(a) de volta!</h1>
         <form className="login-form" onSubmit={handleSubmit}>
@@ -103,13 +104,14 @@ if (data.data && data.data.access_token) {
               disabled={isLoading}
             />
           </div>
-          <Link to="/recuperar-senha" className="forgot-password">
+          <Link to="/recuperar_senha" className="forgot-password">
             Esqueci a senha
           </Link>
-          {/*error && <p className="mensagem-erro">{error}</p>*/}
+
           <button type="submit" disabled={isLoading}>
             {isLoading ? "Entrando..." : "Entrar"}
           </button>
+
           <p className="signup-text">
             Novo por aqui? <Link to="/signup">Crie sua conta</Link>
           </p>

@@ -64,6 +64,129 @@ body {
   transition: background-color 0.3s, color 0.3s;
 }
 
+/* Fundo com bolhas flutuantes */
+.bubbles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none; /* garante que não atrapalhem cliques */
+}
+
+/* Cada bolha individual */
+.bubbles span {
+  position: absolute;
+  bottom: -100px;
+  display: block;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  animation: bubbleRise 8s infinite ease-in;
+  backdrop-filter: blur(3px);
+  animation-delay: 0s;
+}
+
+/* Variações de tamanho, posição e velocidade */
+.bubbles span:nth-child(1) {
+  left: 5%;
+  width: 60px;
+  height: 60px;
+  animation-duration: 8s;
+}
+.bubbles span:nth-child(2) {
+  left: 15%;
+  width: 35px;
+  height: 35px;
+  animation-duration: 7s;
+}
+.bubbles span:nth-child(3) {
+  left: 25%;
+  width: 25px;
+  height: 25px;
+  animation-duration: 6s;
+}
+.bubbles span:nth-child(4) {
+  left: 35%;
+  width: 50px;
+  height: 50px;
+  animation-duration: 9s;
+}
+.bubbles span:nth-child(5) {
+  left: 45%;
+  width: 20px;
+  height: 20px;
+  animation-duration: 7s;
+}
+.bubbles span:nth-child(6) {
+  left: 55%;
+  width: 70px;
+  height: 70px;
+  animation-duration: 10s;
+}
+.bubbles span:nth-child(7) {
+  left: 65%;
+  width: 30px;
+  height: 30px;
+  animation-duration: 8s;
+}
+.bubbles span:nth-child(8) {
+  left: 75%;
+  width: 40px;
+  height: 40px;
+  animation-duration: 9s;
+}
+.bubbles span:nth-child(9) {
+  left: 85%;
+  width: 25px;
+  height: 25px;
+  animation-duration: 7s;
+}
+.bubbles span:nth-child(10) {
+  left: 95%;
+  width: 50px;
+  height: 50px;
+  animation-duration: 8s;
+}
+
+/* Extras para ter mais bolhas */
+.bubbles span:nth-child(11) { left: 12%; width: 30px; height: 30px; animation-duration: 6.5s; }
+.bubbles span:nth-child(12) { left: 28%; width: 45px; height: 45px; animation-duration: 8.5s; }
+.bubbles span:nth-child(13) { left: 42%; width: 25px; height: 25px; animation-duration: 7.5s; }
+.bubbles span:nth-child(14) { left: 58%; width: 35px; height: 35px; animation-duration: 9s; }
+.bubbles span:nth-child(15) { left: 73%; width: 55px; height: 55px; animation-duration: 10s; }
+.bubbles span:nth-child(16) { left: 18%; width: 20px; height: 20px; animation-duration: 7s; }
+.bubbles span:nth-child(17) { left: 33%; width: 28px; height: 28px; animation-duration: 8s; }
+.bubbles span:nth-child(18) { left: 48%; width: 32px; height: 32px; animation-duration: 7.5s; }
+.bubbles span:nth-child(19) { left: 63%; width: 22px; height: 22px; animation-duration: 9s; }
+.bubbles span:nth-child(20) { left: 88%; width: 40px; height: 40px; animation-duration: 8s; }
+
+/* Movimento suave e rápido das bolhas */
+@keyframes bubbleRise {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-110vh) scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* Garante que o conteúdo fique sobre o fundo */
+.login-card,
+.home-header {
+  position: relative;
+  z-index: 2;
+}
+
+
 /* ============================================= */
 /* == PÁGINA HOME == */
 /* ============================================= */
@@ -325,13 +448,10 @@ input:checked + .slider:before {
   margin-bottom: 0.5rem;
 }
 
-
-
 .footer-logo {
   height: 50px;
   margin: 0; 
 }
-
 
 .developed-by {
   display: flex;
@@ -340,7 +460,6 @@ input:checked + .slider:before {
   color: var(--secondary-text-color);
   margin: 0; 
 }
-
 
 .dalove {
   height: 60px; 
@@ -1333,3 +1452,104 @@ a:hover {
     grid-row: auto;
   }
 }
+/* Verificação*/
+.veri-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  /* Assumindo que --background-card é o seu roxo claro do tema */
+  background-color: var(--background-card);
+  padding: 20px;
+  position: relative;
+  overflow: hidden; /* Importante para os círculos */
+}
+.veri-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* Card central de login */
+.veri-card {
+  background-color: var(--card-background); /* Na imagem: branco */
+  padding: 40px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  z-index: 1; /* Para ficar NA FRENTE dos círculos */
+  position: relative; /* Necessário para z-index */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* Sombra sutil opcional */
+}
+
+.veri-card h1 {
+  color: var(--button-color); /* Na imagem: roxo escuro */
+  font-size: 2rem;
+  margin-bottom: 10px; /* Ajustado para bater com a imagem */
+}
+
+.text {
+  color: var(--text-color);
+  font-size: 0.95rem;
+  margin-bottom: 30px; /* Espaço antes dos inputs */
+}
+
+.code-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* Espaçamento entre os inputs */
+  margin-bottom: 25px; /* Espaço antes do botão */
+}
+
+.code-box {
+  width: 50px; /* Largura do input */
+  height: 50px; /* Altura do input */
+  border: none;
+  background-color: white; /* Fundo roxo bem claro dos inputs */
+  border-radius: 10px; /* Inputs arredondados */
+  text-align: center;
+  font-size: 1.5rem; /* Tamanho da fonte do dígito */
+  font-weight: bold;
+  color: var(--button-color); /* Cor do dígito */
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.code-box:focus {
+  outline: 2px solid var(--button-color); /* Destaque ao focar */
+  background-color: var(--card-background); /* Fundo branco ao focar */
+}
+
+/* Botão de confirmar */
+.veri-form button {
+  background-color: var(--button-color);
+  color: var(--card-background);
+  border: none;
+  border-radius: 8px;
+  padding: 15px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  width: 100%; /* Botão com largura total do card */
+}
+
+.veri-form button:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.mensagem-erro {
+  color: var(--button-color);
+  font-size: 0.9rem;
+  margin-top: 10px;
+  text-align: center;
+}
+
