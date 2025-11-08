@@ -1,8 +1,5 @@
-// Arquivo: src/App.tsx
-
 import { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
-// 1. Importe o react-toastify
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -25,9 +22,7 @@ function App() {
   }, [isDarkMode]);
 
   return (
-    // 2. O <Routes> precisa estar dentro de um Fragmento ou div
     <>
-      {/* 3. Adicione o ToastContainer aqui */}
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -38,7 +33,7 @@ function App() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme={isDarkMode ? "dark" : "light"} // Vincula ao tema do app
+        theme={isDarkMode ? "dark" : "light"} 
       />
 
       <Routes>
@@ -57,7 +52,8 @@ function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout isDarkMode={isDarkMode} toggleTheme={toggleTheme} />}>
-            <Route path="/principal" element={<Tela_Principal />} />
+            {/* ETAPA 4: Rota alterada para aceitar um ID opcional */}
+            <Route path="/principal/:transacaoId?" element={<Tela_Principal />} />
             <Route path="/perfil" element={<Perfil />} />
           </Route>
         </Route>

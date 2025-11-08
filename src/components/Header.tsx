@@ -7,14 +7,21 @@ type HeaderProps = {
   isDarkMode: boolean;
   toggleTheme: () => void;
   onProfileClick: () => void; 
+  onMenuClick: () => void; // ETAPA 5: Adicionar prop para o menu
 };
 
-function Header({ isDarkMode, toggleTheme, onProfileClick }: HeaderProps) {
+function Header({ isDarkMode, toggleTheme, onProfileClick, onMenuClick }: HeaderProps) {
   const { isAuthenticated, logout } = useAuth(); 
   
   return (
     <header className="profile-header"> 
-      <FaBars size={24} className="menu-icon" />
+      {/* ETAPA 5: Adicionar onClick para o menu */}
+      <FaBars 
+        size={24} 
+        className="menu-icon" 
+        onClick={onMenuClick} 
+        style={{ cursor: 'pointer' }} // Adiciona feedback visual
+      />
       <div className="header-actions">
         {isDarkMode ? (
           <LuToggleRight 

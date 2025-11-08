@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+// ETAPA 4: Importar useParams para ler o ID da URL
+import { useNavigate, useParams } from "react-router-dom";
 import adatech from "../assets/Polvo_AdaTech.png";
 import UploadBox from "../components/UploadBox";
 import { toast } from 'react-toastify';
@@ -18,31 +19,93 @@ type UIState =
   | "processed"
   | "exporting" 
   | "downloaded";
+  
+// ETAPA 4: Criar uma função helper para fetch (simplifica a autenticação)
+const fetchAPI = async (url: string, options: RequestInit = {}) => {
+  const token = localStorage.getItem("authToken");
+  
+  const headers = new Headers(options.headers || {});
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+  if (!(options.body instanceof FormData)) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  const response = await fetch(url, { ...options, headers });
+
+  if (response.status === 401) {
+    localStorage.removeItem("authToken");
+    // Recarrega a página no login, limpando todo o estado
+    window.location.href = '/login'; 
+    throw new Error("Sessão expirada. Faça login novamente.");
+  }
+  
+  return response;
+};
+
 
 function Tela_Principal() {
   const navigate = useNavigate();
+  // ETAPA 4: Ler o :transacaoId da URL
+  const { transacaoId } = useParams<{ transacaoId?: string }>();
+
   const [file, setFile] = useState<File | null>(null);
+
+  // ETAPA 4: Novo estado para armazenar o ID da transação atual
+  const [currentTransactionId, setCurrentTransactionId] = useState<number | null>(null);
 
   const [uiState, setUiState] = useState<UIState>("initial");
   const [extractedItems, setExtractedItems] = useState<ExtractedItem[]>([]);
   const [processedItems, setProcessedItems] = useState<ProcessedItem[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null); // 'error' ainda é útil para lógica interna se desejado
   const [saveMessage, setSaveMessage] = useState<string | null>(null); 
 
+  // ETAPA 4: useEffect para carregar dados do histórico (quando transacaoId muda)
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      navigate("/login");
+    // Se um ID de transação está na URL, carrega o histórico
+    if (transacaoId) {
+      const loadTransaction = async () => {
+        setUiState("processing"); // Mostra o Loader
+        setError(null);
+        try {
+          const response = await fetchAPI(`http://localhost:8000/api/transacao/${transacaoId}`);
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || "Erro ao carregar histórico.");
+          }
+
+          const data = await response.json(); // Espera-se { transacao_id: number, items: ProcessedItem[] }
+          
+          setProcessedItems(data.items);
+          setCurrentTransactionId(data.transacao_id);
+          setFile(null); // Garante que a caixa de upload não apareça
+          setUiState("processed"); // Pula direto para a tela de validação final
+          
+        } catch (err: any) {
+          toast.error(err.message);
+          navigate("/principal"); // Volta para a tela inicial em caso de erro
+        }
+      };
+      
+      loadTransaction();
+    } else {
+      // Se não há ID, é um novo processo. Reseta tudo.
+      resetState();
     }
-  }, [navigate]);
+  }, [transacaoId, navigate]); // Executa sempre que o ID na URL mudar
+
 
   const isLoading =
     uiState === "extracting" ||
     uiState === "processing" ||
     uiState === "exporting"; 
 
+  // ETAPA 4: resetState atualizado para limpar o ID e navegar
   const resetState = () => {
     setFile(null);
+    setCurrentTransactionId(null); // Limpa o ID
     setUiState("initial");
     setExtractedItems([]);
     setProcessedItems([]);
@@ -50,19 +113,16 @@ function Tela_Principal() {
     setSaveMessage(null); 
     const fileInput = document.getElementById("pdf-upload") as HTMLInputElement;
     if (fileInput) fileInput.value = "";
+    
+    // Se estivermos em uma rota de histórico (ex: /principal/123), volta para /principal
+    if (transacaoId) {
+      navigate("/principal");
+    }
   };
 
+  // ETAPA 4: handleExtract atualizado
   const handleExtract = async () => {
     if (!file) return;
-
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      //setError("Usuário não autenticado. Faça login novamente.");
-      toast.error("Usuário não autenticado. Faça login novamente.");
-      setUiState("initial"); 
-      navigate("/login");
-      return;
-    }
 
     setUiState("extracting");
     setError(null);
@@ -71,73 +131,56 @@ function Tela_Principal() {
     formData.append("file", file);
 
     try {
-      const response = await fetch("http://localhost:8000/api/extract_from_pdf", {
+      // 1. Chama o endpoint (não precisa mais de headers manuais com fetchAPI)
+      const response = await fetchAPI("http://localhost:8000/api/extract_from_pdf", {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`
-        },
         body: formData,
       });
 
       if (!response.ok) {
-        if (response.status === 401) {
-            //setError("Sessão expirada ou inválida. Faça login novamente.");
-            toast.error("Sessão expirada ou inválida. Faça login novamente.");
-            localStorage.removeItem("authToken");
-            navigate("/login");
-            return; 
-        }
         const errorData = await response.json();
         throw new Error(errorData.detail || "Erro na extração do PDF");
       }
       
-      const data: ExtractedItem[] = await response.json();
-      setExtractedItems(data);
+      // 2. Espera a nova resposta: { transacao_id: number, items: ExtractedItem[] }
+      const data = await response.json(); 
+      
+      // 3. Salva o ID da transação no estado
+      setExtractedItems(data.items);
+      setCurrentTransactionId(data.transacao_id); 
       setUiState("extracted");
+
     } catch (err: any) {
       toast.error(err.message || "Ocorreu um erro desconhecido.");
-      setError(err.message)
+      setError(err.message) // Mantido para referência, se necessário
       setUiState("initial");
     }
   };
 
+  // ETAPA 4: handleProcess atualizado
   const handleProcess = async () => {
+    // 1. Garante que temos um ID de transação para processar
+    if (!currentTransactionId) {
+      toast.error("Erro: ID da transação não encontrado.");
+      return;
+    }
+
     setUiState("processing");
     setError(null);
     setSaveMessage(null); 
 
-    const token = localStorage.getItem("authToken");
-
-    if (!token) {
-      //setError("Usuário não autenticado. Faça login novamente.");
-      toast.error("Usuário não autenticado. Faça login novamente.");
-      setUiState("extracted"); 
-      navigate("/login");
-      return;
-    }
-
     try {
-      const response = await fetch("http://localhost:8000/api/process_items", {
+      // 2. Chama o novo endpoint com o ID na URL
+      const response = await fetchAPI(`http://localhost:8000/api/process_items/${currentTransactionId}`, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` 
-        },
         body: JSON.stringify({ items: extractedItems }),
       });
 
       if (!response.ok) {
-        if (response.status === 401) {
-            //setError("Sessão expirada ou inválida. Faça login novamente.");
-            toast.error("Sessão expirada ou inválida. Faça login novamente.");
-            localStorage.removeItem("authToken");
-            navigate("/login");
-            setUiState("extracted"); 
-            return; 
-        }
         const errorData = await response.json();
         throw new Error(errorData.detail || "Erro no processamento dos itens.");
       }
+      
       const data: ProcessedItem[] = await response.json();
       setProcessedItems(data);
       setUiState("processed");
@@ -148,49 +191,30 @@ function Tela_Principal() {
     }
   };
 
+  // ETAPA 4: handleExport (NENHUMA MUDANÇA DE LÓGICA NECESSÁRIA)
+  // O endpoint /generate_excel não depende do ID da transação, só dos itens.
   const handleExport = async () => {
     if (processedItems.length === 0) return;
-
-    const token = localStorage.getItem("authToken");
-
-    if (!token) {
-      //setError("Usuário não autenticado. Faça login novamente.");
-      toast.error("Usuário não autenticado. Faça login novamente.");
-      setUiState("processed"); 
-      navigate("/login");
-      return;
-    }
 
     setUiState("exporting");
     setError(null);
     setSaveMessage(null); 
     try {
-      const response = await fetch("http://localhost:8000/api/generate_excel", {
+      const response = await fetchAPI("http://localhost:8000/api/generate_excel", {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` 
-        },
         body: JSON.stringify({ items: processedItems }),
       });
 
       if (!response.ok) {
-          if (response.status === 401) {
-            //setError("Sessão expirada ou inválida. Faça login novamente.");
-            toast.error("Sessão expirada ou inválida. Faça login novamente.");
-            localStorage.removeItem("authToken");
-            navigate("/login");
-            setUiState("processed"); 
-            return; 
-        }
-        throw new Error("Erro ao gerar o arquivo Excel.");
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Erro ao gerar o arquivo Excel.");
       }
       
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${file?.name.replace(".pdf", "")}_classificado.xlsx`;
+      a.download = `${file?.name.replace(".pdf", "") || 'processo'}_classificado.xlsx`;
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
@@ -202,30 +226,24 @@ function Tela_Principal() {
     }
   };
 
+  // ETAPA 4: handleSaveToDB atualizado
   const handleSaveToDB = async () => {
     if (processedItems.length === 0) return;
-
-    setUiState("exporting"); 
-    setError(null);
-    setSaveMessage(null);
-
-    const token = localStorage.getItem("authToken"); 
-
-    if (!token) {
-      //setError("Usuário não autenticado. Faça login novamente.");
-      toast.error("Usuário não autenticado. Faça login novamente.");
-      setUiState("processed");
-      navigate("/login"); 
+    
+    // 1. Garante que temos um ID de transação para atualizar
+    if (!currentTransactionId) {
+      toast.error("Erro: ID da transação não encontrado para salvar.");
       return;
     }
 
+    setUiState("exporting"); // Reutiliza o estado de loading
+    setError(null);
+    setSaveMessage(null);
+
     try {
-      const response = await fetch("http://localhost:8000/api/save_items", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` 
-        },
+      // 2. Chama o novo endpoint PUT com o ID na URL
+      const response = await fetchAPI(`http://localhost:8000/api/update_transaction/${currentTransactionId}`, {
+        method: "PUT", 
         body: JSON.stringify({ items: processedItems }),
       });
 
@@ -247,23 +265,14 @@ function Tela_Principal() {
 
 
       if (!response.ok) {
-        if (response.status === 401) {
-            //setError("Sessão expirada ou inválida. Faça login novamente.");
-            toast.error("Sessão expirada ou inválida. Faça login novamente.");
-            localStorage.removeItem("authToken"); 
-            navigate("/login");
-        } else {
-            throw new Error(data?.detail || `Erro ao salvar: Status ${response.status}`);
-        }
+         throw new Error(data?.detail || `Erro ao salvar: Status ${response.status}`);
       } else {
-          //setSaveMessage(data?.message || "Itens salvos com sucesso!");
-          toast.success(data?.message || "Itens salvos com sucesso!"); // Adicione esta linha
-          setUiState("processed");
+          toast.success(data?.message || "Itens salvos com sucesso!"); 
+          setUiState("processed"); // Volta para a tela de processados
       }
 
     } catch (err: any) {
       console.error("Erro na função handleSaveToDB:", err); 
-      //setError(err.message || "Ocorreu um erro ao tentar salvar."); 
       toast.error(err.message || "Ocorreu um erro ao tentar salvar.");
       setUiState("processed"); 
     }
@@ -300,8 +309,9 @@ function Tela_Principal() {
     const f = e.target.files?.[0];
     if (f && f.type === "application/pdf") {
       setFile(f);
-      // Reseta o estado
+      // Reseta o estado (mas não navega)
       setUiState("initial");
+      setCurrentTransactionId(null);
       setExtractedItems([]);
       setProcessedItems([]);
       setError(null);
@@ -315,6 +325,7 @@ function Tela_Principal() {
     if (f && f.type === "application/pdf") {
       setFile(f);
       setUiState("initial");
+      setCurrentTransactionId(null);
       setExtractedItems([]);
       setProcessedItems([]);
       setError(null);
@@ -323,7 +334,8 @@ function Tela_Principal() {
   };
 
   const handleRemoveFile = () => {
-    resetState();
+    // A função resetState agora também lida com a navegação se necessário
+    resetState(); 
   };
 
   return (
@@ -338,7 +350,8 @@ function Tela_Principal() {
               <p>Como posso ajudar?</p>
             </div>
 
-            {!isLoading ? (
+            {/* ETAPA 4: Oculta a caixa de upload se estivermos carregando do histórico */}
+            {!isLoading && !transacaoId && (
               <UploadBox
                 file={file}
                 loading={false}
@@ -354,15 +367,17 @@ function Tela_Principal() {
                 }
                 showUploadButton={uiState === "initial" && !!file}
               />
-            ) : (
+            )}
+            
+            {isLoading && (
               <Loader />
             )}
 
-            {/*error && <p className="error-message" style={{ color: 'red', marginTop: '1rem' }}>{error}</p>*/}
+            {/* Mensagens de sucesso/erro (toastify agora cuida dos erros) */}
             {saveMessage && !error && <p className="success-message" style={{ color: 'green', marginTop: '1rem', fontWeight: 'bold' }}>{saveMessage}</p>}
 
-
-            {uiState === "initial" && !file && (
+            {/* ETAPA 4: Oculta se estiver carregando do histórico */}
+            {uiState === "initial" && !file && !transacaoId && (
               <p className="disclaimer">
                 A IA pode cometer erros. Considere verificar informações
                 importantes.
@@ -420,7 +435,7 @@ function Tela_Principal() {
               className="export-button save-db"
               style={{ marginRight: '1rem' }} 
             >
-              Salvar Alterações no Banco
+              Salvar Alterações
             </button>
 
             <button
@@ -446,8 +461,8 @@ function Tela_Principal() {
           </section>
         )}
 
-
-        {uiState === "initial" && !file && (
+        {/* ETAPA 4: Oculta se estiver carregando do histórico */}
+        {uiState === "initial" && !file && !transacaoId && (
           <section className="mission-section">
             <p>
               Minha missão é automatizar a criação da instrução de registro
