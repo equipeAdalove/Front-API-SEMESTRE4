@@ -65,7 +65,9 @@ const SignUp: React.FC<SignUpProps> = ({ isDarkMode, toggleTheme }) => {
   return (
     <div className="signup-container" data-theme={isDarkMode ? 'dark' : 'light'}>
       <div className="bubbles">
-        {[...Array(15)].map((_, i) => <div className="bubble" key={i}></div>)}
+        {Array.from({ length: 12 }).map((_, i) => (
+          <span key={i}></span>
+        ))}
       </div>
 
       <header className="signup-header">
