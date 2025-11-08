@@ -679,6 +679,22 @@ input:checked + .slider:before {
   padding: 20px 30px;
 }
 
+.header-left-items {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.back-arrow {
+  cursor: pointer;
+  color: var(--primary-text-color);
+  transition: opacity 0.2s ease;
+}
+
+.back-arrow:hover {
+  opacity: 0.7;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
@@ -791,8 +807,8 @@ input:checked + .slider:before {
 
 .logout-button {
   background-color: transparent;
-  color: var(--logout-button-color);
-  border: 1px solid var(--logout-button-color);
+  color: #e74c3c; 
+  border: 1px solid #e74c3c; 
   padding: 10px 20px;
   border-radius: 8px;
   font-weight: bold;
@@ -801,8 +817,8 @@ input:checked + .slider:before {
 }
 
 .logout-button:hover {
-  background-color: var(--logout-button-color);
-  color: var(--button-hover-color)
+  background-color: #e74c3c;
+  color: #FFFFFF;
 }
 
 .profile-slogan {
@@ -1271,4 +1287,49 @@ a:hover {
 
 .Toastify__close-button--dark {
   color: var(--toastify-text-color-dark);
+}
+
+[data-theme='dark'] .terms-group input[type="checkbox"] {
+  border-color: var(--text-color);
+}
+
+/* ============================================= */
+/* RESPONSIVIDADE */
+/* ============================================= */
+
+@media (max-width: 900px) {
+
+  /* Ajustes Gerais */
+  .main-content {
+    padding: 1rem 1.5rem;
+  }
+
+  /* Tela Principal (Boas-vindas) */
+  .welcome-section {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .octopus-logo {
+    width: 150px;
+  }
+
+  .welcome-text h1 {
+    font-size: 1.8rem;
+  }
+
+  /* Formulários de Validação */
+  
+  .data-form-extraction {
+    grid-template-columns: 1fr;
+  }
+
+  .data-form {
+    grid-template-columns: 1fr;
+  }
+
+  .form-group.description-group {
+    grid-column: auto;
+    grid-row: auto;
+  }
 }
