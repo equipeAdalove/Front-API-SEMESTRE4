@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-// ETAPA 4: Importar useParams para ler o ID da URL
 import { useNavigate, useParams } from "react-router-dom";
 import adatech from "../assets/Polvo_AdaTech.png";
 import UploadBox from "../components/UploadBox";
@@ -20,7 +19,6 @@ type UIState =
   | "exporting" 
   | "downloaded";
   
-// ETAPA 4: Criar uma função helper para fetch (simplifica a autenticação)
 const fetchAPI = async (url: string, options: RequestInit = {}) => {
   const token = localStorage.getItem("authToken");
   
@@ -36,7 +34,6 @@ const fetchAPI = async (url: string, options: RequestInit = {}) => {
 
   if (response.status === 401) {
     localStorage.removeItem("authToken");
-    // Recarrega a página no login, limpando todo o estado
     window.location.href = '/login'; 
     throw new Error("Sessão expirada. Faça login novamente.");
   }
@@ -47,26 +44,21 @@ const fetchAPI = async (url: string, options: RequestInit = {}) => {
 
 function Tela_Principal() {
   const navigate = useNavigate();
-  // ETAPA 4: Ler o :transacaoId da URL
   const { transacaoId } = useParams<{ transacaoId?: string }>();
 
   const [file, setFile] = useState<File | null>(null);
-
-  // ETAPA 4: Novo estado para armazenar o ID da transação atual
   const [currentTransactionId, setCurrentTransactionId] = useState<number | null>(null);
 
   const [uiState, setUiState] = useState<UIState>("initial");
   const [extractedItems, setExtractedItems] = useState<ExtractedItem[]>([]);
   const [processedItems, setProcessedItems] = useState<ProcessedItem[]>([]);
-  const [error, setError] = useState<string | null>(null); // 'error' ainda é útil para lógica interna se desejado
+  const [error, setError] = useState<string | null>(null); 
   const [saveMessage, setSaveMessage] = useState<string | null>(null); 
 
-  // ETAPA 4: useEffect para carregar dados do histórico (quando transacaoId muda)
   useEffect(() => {
-    // Se um ID de transação está na URL, carrega o histórico
     if (transacaoId) {
       const loadTransaction = async () => {
-        setUiState("processing"); // Mostra o Loader
+        setUiState("processing"); 
         setError(null);
         try {
           const response = await fetchAPI(`http://localhost:8000/api/transacao/${transacaoId}`);
@@ -76,25 +68,24 @@ function Tela_Principal() {
             throw new Error(errorData.detail || "Erro ao carregar histórico.");
           }
 
-          const data = await response.json(); // Espera-se { transacao_id: number, items: ProcessedItem[] }
+          const data = await response.json(); 
           
           setProcessedItems(data.items);
           setCurrentTransactionId(data.transacao_id);
-          setFile(null); // Garante que a caixa de upload não apareça
-          setUiState("processed"); // Pula direto para a tela de validação final
+          setFile(null); 
+          setUiState("processed"); 
           
         } catch (err: any) {
           toast.error(err.message);
-          navigate("/principal"); // Volta para a tela inicial em caso de erro
+          navigate("/principal"); 
         }
       };
       
       loadTransaction();
     } else {
-      // Se não há ID, é um novo processo. Reseta tudo.
       resetState();
     }
-  }, [transacaoId, navigate]); // Executa sempre que o ID na URL mudar
+  }, [transacaoId, navigate]);
 
 
   const isLoading =
@@ -102,10 +93,9 @@ function Tela_Principal() {
     uiState === "processing" ||
     uiState === "exporting"; 
 
-  // ETAPA 4: resetState atualizado para limpar o ID e navegar
   const resetState = () => {
     setFile(null);
-    setCurrentTransactionId(null); // Limpa o ID
+    setCurrentTransactionId(null); 
     setUiState("initial");
     setExtractedItems([]);
     setProcessedItems([]);
@@ -114,13 +104,11 @@ function Tela_Principal() {
     const fileInput = document.getElementById("pdf-upload") as HTMLInputElement;
     if (fileInput) fileInput.value = "";
     
-    // Se estivermos em uma rota de histórico (ex: /principal/123), volta para /principal
     if (transacaoId) {
       navigate("/principal");
     }
   };
 
-  // ETAPA 4: handleExtract atualizado
   const handleExtract = async () => {
     if (!file) return;
 
@@ -131,7 +119,6 @@ function Tela_Principal() {
     formData.append("file", file);
 
     try {
-      // 1. Chama o endpoint (não precisa mais de headers manuais com fetchAPI)
       const response = await fetchAPI("http://localhost:8000/api/extract_from_pdf", {
         method: "POST",
         body: formData,
@@ -142,24 +129,20 @@ function Tela_Principal() {
         throw new Error(errorData.detail || "Erro na extração do PDF");
       }
       
-      // 2. Espera a nova resposta: { transacao_id: number, items: ExtractedItem[] }
       const data = await response.json(); 
       
-      // 3. Salva o ID da transação no estado
       setExtractedItems(data.items);
       setCurrentTransactionId(data.transacao_id); 
       setUiState("extracted");
 
     } catch (err: any) {
       toast.error(err.message || "Ocorreu um erro desconhecido.");
-      setError(err.message) // Mantido para referência, se necessário
+      setError(err.message) 
       setUiState("initial");
     }
   };
 
-  // ETAPA 4: handleProcess atualizado
   const handleProcess = async () => {
-    // 1. Garante que temos um ID de transação para processar
     if (!currentTransactionId) {
       toast.error("Erro: ID da transação não encontrado.");
       return;
@@ -170,7 +153,6 @@ function Tela_Principal() {
     setSaveMessage(null); 
 
     try {
-      // 2. Chama o novo endpoint com o ID na URL
       const response = await fetchAPI(`http://localhost:8000/api/process_items/${currentTransactionId}`, {
         method: "POST",
         body: JSON.stringify({ items: extractedItems }),
@@ -191,8 +173,6 @@ function Tela_Principal() {
     }
   };
 
-  // ETAPA 4: handleExport (NENHUMA MUDANÇA DE LÓGICA NECESSÁRIA)
-  // O endpoint /generate_excel não depende do ID da transação, só dos itens.
   const handleExport = async () => {
     if (processedItems.length === 0) return;
 
@@ -226,22 +206,19 @@ function Tela_Principal() {
     }
   };
 
-  // ETAPA 4: handleSaveToDB atualizado
   const handleSaveToDB = async () => {
     if (processedItems.length === 0) return;
     
-    // 1. Garante que temos um ID de transação para atualizar
     if (!currentTransactionId) {
       toast.error("Erro: ID da transação não encontrado para salvar.");
       return;
     }
 
-    setUiState("exporting"); // Reutiliza o estado de loading
+    setUiState("exporting"); 
     setError(null);
     setSaveMessage(null);
 
     try {
-      // 2. Chama o novo endpoint PUT com o ID na URL
       const response = await fetchAPI(`http://localhost:8000/api/update_transaction/${currentTransactionId}`, {
         method: "PUT", 
         body: JSON.stringify({ items: processedItems }),
@@ -268,7 +245,7 @@ function Tela_Principal() {
          throw new Error(data?.detail || `Erro ao salvar: Status ${response.status}`);
       } else {
           toast.success(data?.message || "Itens salvos com sucesso!"); 
-          setUiState("processed"); // Volta para a tela de processados
+          setUiState("processed"); 
       }
 
     } catch (err: any) {
@@ -309,7 +286,6 @@ function Tela_Principal() {
     const f = e.target.files?.[0];
     if (f && f.type === "application/pdf") {
       setFile(f);
-      // Reseta o estado (mas não navega)
       setUiState("initial");
       setCurrentTransactionId(null);
       setExtractedItems([]);
@@ -334,13 +310,14 @@ function Tela_Principal() {
   };
 
   const handleRemoveFile = () => {
-    // A função resetState agora também lida com a navegação se necessário
     resetState(); 
   };
 
   return (
     <div className="page-container">
       <main className="main-content">
+        
+        {/* --- CORREÇÃO (Pedido 2): 'welcome-section' é sempre visível --- */}
         <div className="welcome-section">
           <img src={adatech} alt="Logo de Polvo" className="octopus-logo" />
 
@@ -350,8 +327,8 @@ function Tela_Principal() {
               <p>Como posso ajudar?</p>
             </div>
 
-            {/* ETAPA 4: Oculta a caixa de upload se estivermos carregando do histórico */}
-            {!isLoading && !transacaoId && (
+            {/* Mostra a caixa de upload APENAS se não houver ID de transação */}
+            {!transacaoId && !isLoading && (
               <UploadBox
                 file={file}
                 loading={false}
@@ -369,14 +346,19 @@ function Tela_Principal() {
               />
             )}
             
-            {isLoading && (
+            {/* Mostra o loader de upload/extração (só se !transacaoId) */}
+            {isLoading && !transacaoId && (
               <Loader />
             )}
 
-            {/* Mensagens de sucesso/erro (toastify agora cuida dos erros) */}
+            {/* Mostra o loader de carregamento de histórico (só se transacaoId) */}
+            {isLoading && transacaoId && (
+              <Loader />
+            )}
+
             {saveMessage && !error && <p className="success-message" style={{ color: 'green', marginTop: '1rem', fontWeight: 'bold' }}>{saveMessage}</p>}
 
-            {/* ETAPA 4: Oculta se estiver carregando do histórico */}
+            {/* Oculta disclaimer se estiver no histórico */}
             {uiState === "initial" && !file && !transacaoId && (
               <p className="disclaimer">
                 A IA pode cometer erros. Considere verificar informações
@@ -385,6 +367,8 @@ function Tela_Principal() {
             )}
           </div>
         </div>
+        {/* --- FIM DA CORREÇÃO --- */}
+
 
         {uiState === "extracted" && !isLoading && (
           <section className="validation-section">
@@ -393,6 +377,7 @@ function Tela_Principal() {
               Verifique e corrija os Part Numbers e descrições extraídos antes
               de continuar.
             </p>
+            {/* --- CORREÇÃO (Pedido 2): Adiciona a div 'form-list-grid' --- */}
             <div className="form-list-grid"> 
               {extractedItems.map((item, index) => (
                 <ExtractionFormSection
@@ -415,8 +400,15 @@ function Tela_Principal() {
 
         {uiState === "processed" && !isLoading && (
           <section className="validation-section">
-            <h2>Validação Final:</h2>
-
+            {/* Adiciona título APENAS se for um item do histórico */}
+            {transacaoId && (
+              <h2>Visualizando Histórico:</h2>
+            )}
+            {!transacaoId && (
+              <h2>Validação Final:</h2>
+            )}
+            
+            {/* --- CORREÇÃO (Pedido 2): Adiciona a div 'form-list-grid' --- */}
             <div className="form-list-grid">
               {processedItems.map((item, index) => (
                 <FormSection
@@ -435,7 +427,8 @@ function Tela_Principal() {
               className="export-button save-db"
               style={{ marginRight: '1rem' }} 
             >
-              Salvar Alterações
+              {/* Texto do botão muda se for histórico */}
+              {transacaoId ? "Salvar Alterações" : "Salvar no Banco"}
             </button>
 
             <button
@@ -461,7 +454,7 @@ function Tela_Principal() {
           </section>
         )}
 
-        {/* ETAPA 4: Oculta se estiver carregando do histórico */}
+        {/* Esta seção já estava correta, pois inclui a verificação !transacaoId */}
         {uiState === "initial" && !file && !transacaoId && (
           <section className="mission-section">
             <p>

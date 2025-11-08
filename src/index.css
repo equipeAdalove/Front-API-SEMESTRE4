@@ -1,8 +1,3 @@
-/* ============================================= */
-/* == GERAL == */
-/* ============================================= */
-
-/* Import Poppins Font */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 :root {
@@ -72,7 +67,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: var(--home-bg-color); /* Usa variável */
+  background-color: var(--home-bg-color); 
   position: relative;
   overflow: hidden;
   padding: 2rem 4rem;
@@ -101,7 +96,6 @@ body {
   color: var(--primary-text-color);
 }
 
-/* Estilos do Toggle Switch */
 .switch {
   position: relative;
   display: inline-block;
@@ -195,7 +189,6 @@ input:checked + .slider:before {
   background-color: var(--button-hover-color);
 }
 
-/* Imagem do Polvo */
 .image-container {
   position: absolute;
   right: -620px;
@@ -208,10 +201,9 @@ input:checked + .slider:before {
 .octopus-image {
   width: 600px;
   height: auto;
-  opacity: var(--octopus-opacity, 1); /* Opacidade para o polvo no light mode */
+  opacity: var(--octopus-opacity, 1); 
 }
 
-/* Rodapé */
 .home-footer {
   width: 100%;
   z-index: 10;
@@ -475,20 +467,22 @@ input:checked + .slider:before {
 
 .form-input,
 .form-textarea {
-  background-color: var(--form-input-bg); /* Usa variável */
-  border: 1px solid var(--form-input-border); /* Usa variável */
+  background-color: var(--form-input-bg); 
+  border: 1px solid var(--form-input-border); 
   border-radius: 8px;
   padding: 0.8rem;
-  color: var(--form-input-text); /* Usa variável */
+  color: var(--form-input-text); 
   font-family: 'Poppins', sans-serif;
   width: 100%;
   box-sizing: border-box;
   transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+  outline: none;
 }
 
 .form-textarea {
   min-height: 200px;
   resize: vertical;
+  outline: none;
 }
 
 .form-note {
@@ -1132,6 +1126,7 @@ a:hover {
   box-sizing: border-box;
   min-height: 80px;
   resize: vertical;
+  outline: none;
 }
 
 .download-success-section {
@@ -1398,4 +1393,103 @@ a:hover {
   padding: 1rem;
   color: var(--secondary-text-color);
   text-align: center;
+}
+
+.profile-header {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  background-color: var(--background-color); 
+  border-bottom: 1px solid var(--form-input-border);
+  padding-top: 19px; 
+  padding-bottom: 19px;
+}
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main.main-content {
+  flex-grow: 1;
+}
+
+.sidebar-item {
+  position: relative; 
+}
+
+.sidebar-item-actions {
+  display: flex;
+  gap: 0.75rem;
+  padding-right: 1rem;
+  color: var(--secondary-text-color);
+  position: relative; 
+}
+
+.sidebar-item-actions svg:not(.editing svg) { 
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.sidebar-item-actions svg:hover:not(.editing svg) {
+  color: var(--primary-text-color);
+}
+
+.sidebar-dropdown-menu {
+  position: absolute;
+  right: 1.5rem;
+  top: 1.5rem;
+  background-color: var(--home-bg-color);
+  border: 1px solid var(--form-input-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 102; 
+  display: flex;
+  flex-direction: column;
+  width: 150px;
+}
+
+.sidebar-dropdown-menu button {
+  background: none;
+  border: none;
+  color: var(--primary-text-color);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.9rem;
+}
+
+.sidebar-dropdown-menu button:hover {
+  background-color: var(--container-bg-color);
+}
+
+.sidebar-dropdown-menu button.delete {
+  color: #e74c3c; 
+}
+
+.sidebar-edit-input {
+  flex-grow: 1;
+  margin-left: 1rem;
+  background-color: var(--form-input-bg);
+  border: 1px solid var(--button-color);
+  border-radius: 8px;
+  padding: 0.65rem;
+  color: var(--form-input-text);
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.9rem;
+  outline: none;
+  margin-right: 12px;
+}
+
+.sidebar-item-actions.editing svg {
+  color: var(--button-color);
+  cursor: pointer;
+}
+.sidebar-item-actions.editing svg:hover {
+  opacity: 0.7;
 }
