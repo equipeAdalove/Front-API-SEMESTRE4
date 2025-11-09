@@ -32,7 +32,7 @@ function Login({ isDarkMode, toggleTheme }: LoginProps) {
       formData.append('username', email);
       formData.append('password', password);
 
-      const response = await fetch(`${API_URL}/auth/login`, { 
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: formData.toString(),
@@ -43,8 +43,8 @@ function Login({ isDarkMode, toggleTheme }: LoginProps) {
       if (!response.ok) {
         throw new Error(data.detail || "E-mail ou senha inválidos.");
       }
-      
-      if (data.data && data.data.access_token) { 
+
+      if (data.data && data.data.access_token) {
         login(data.data.access_token, email);
       } else {
         throw new Error("Token de acesso não encontrado na resposta.");
@@ -59,7 +59,7 @@ function Login({ isDarkMode, toggleTheme }: LoginProps) {
 
   return (
     <div className="login-page" data-theme={isDarkMode ? "dark" : "light"}>
-       <div className="bubbles">
+      <div className="bubbles">
         {Array.from({ length: 20 }).map((_, i) => (
           <span key={i}></span>
         ))}
@@ -87,7 +87,6 @@ function Login({ isDarkMode, toggleTheme }: LoginProps) {
             <input
               id="email"
               type="email"
-              placeholder="Digite seu email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isLoading}
@@ -98,7 +97,6 @@ function Login({ isDarkMode, toggleTheme }: LoginProps) {
             <input
               id="senha"
               type="password"
-              placeholder="Digite sua senha"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}

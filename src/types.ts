@@ -11,3 +11,5 @@ export type ProcessedItem = {
     descricao: string;
     is_new_manufacturer: boolean;
 };
+
+

@@ -53,7 +53,8 @@ function App() {
         />
         <Route
           path="/signup"
-          element={<SignUp isDarkMode={isDarkMode} toggleTheme={toggleTheme} />}
+          element={<SignUp isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
+          }
         />
         <Route
           path="/recuperar_senha"

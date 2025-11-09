@@ -37,7 +37,7 @@ function Perfil() {
         if (!response.ok) {
           throw new Error(data.detail || "Falha ao buscar dados do perfil.");
         }
-        
+
         setUserProfile(data);
 
       } catch (err: any) {
@@ -60,7 +60,7 @@ function Perfil() {
   if (isLoading) {
     return <div>Carregando perfil...</div>;
   }
-  
+
   if (error) {
     return <div>Erro: {error}</div>;
   }
@@ -77,7 +77,7 @@ function Perfil() {
           <div className="info-grid">
             <span className="info-label">Nome Completo:</span>
             <span className="info-value">{userProfile?.name}</span>
-            
+
             <span className="info-label">Email:</span>
             <span className="info-value">{userProfile?.email}</span>
 
