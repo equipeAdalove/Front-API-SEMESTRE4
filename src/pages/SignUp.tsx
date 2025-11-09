@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import '../index.css';
 import { toast } from 'react-toastify'
+import PrivacyModal from '../components/PrivacyModal';
+import TermsModal from '../components/TermsModal ';
 
 interface SignUpProps {
   isDarkMode: boolean;
@@ -11,6 +13,23 @@ interface SignUpProps {
 const API_URL = "http://localhost:8000/api";
 
 const SignUp: React.FC<SignUpProps> = ({ isDarkMode, toggleTheme }) => {
+
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
+
+  const openTermsModal = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsTermsModalOpen(true);
+  };
+
+  const openPrivacyModal = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsPrivacyModalOpen(true);
+  };
+
+  const closeTermsModal = () => setIsTermsModalOpen(false);
+  const closePrivacyModal = () => setIsPrivacyModalOpen(false);
+
   const navigate = useNavigate();
 
   const [fullName, setFullName] = useState('');
@@ -45,7 +64,7 @@ const SignUp: React.FC<SignUpProps> = ({ isDarkMode, toggleTheme }) => {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.detail || 'Não foi possível criar a conta.');
       }
@@ -65,16 +84,18 @@ const SignUp: React.FC<SignUpProps> = ({ isDarkMode, toggleTheme }) => {
   return (
     <div className="signup-container" data-theme={isDarkMode ? 'dark' : 'light'}>
       <div className="bubbles">
-        {[...Array(15)].map((_, i) => <div className="bubble" key={i}></div>)}
+        {Array.from({ length: 12 }).map((_, i) => (
+          <span key={i}></span>
+        ))}
       </div>
 
       <header className="signup-header">
         <h1 className="logo">AdaTech</h1>
         <label className="switch">
-          <input 
-            type="checkbox" 
-            onChange={toggleTheme} 
-            checked={isDarkMode} 
+          <input
+            type="checkbox"
+            onChange={toggleTheme}
+            checked={isDarkMode}
           />
           <span className="slider round"></span>
         </label>
@@ -86,9 +107,9 @@ const SignUp: React.FC<SignUpProps> = ({ isDarkMode, toggleTheme }) => {
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="fullName">Nome completo:</label>
-              <input 
-                type="text" 
-                id="fullName" 
+              <input
+                type="text"
+                id="fullName"
                 name="fullName"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
@@ -98,9 +119,9 @@ const SignUp: React.FC<SignUpProps> = ({ isDarkMode, toggleTheme }) => {
 
             <div className="form-group">
               <label htmlFor="email">Email:</label>
-              <input 
-                type="email" 
-                id="email" 
+              <input
+                type="email"
+                id="email"
                 name="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -111,9 +132,9 @@ const SignUp: React.FC<SignUpProps> = ({ isDarkMode, toggleTheme }) => {
             <div className="password-group">
               <div className="form-group">
                 <label htmlFor="password">Insira uma senha:</label>
-                <input 
-                  type="password" 
-                  id="password" 
+                <input
+                  type="password"
+                  id="password"
                   name="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -122,9 +143,9 @@ const SignUp: React.FC<SignUpProps> = ({ isDarkMode, toggleTheme }) => {
               </div>
               <div className="form-group">
                 <label htmlFor="confirmPassword">Confirme a senha:</label>
-                <input 
-                  type="password" 
-                  id="confirmPassword" 
+                <input
+                  type="password"
+                  id="confirmPassword"
                   name="confirmPassword"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -134,11 +155,14 @@ const SignUp: React.FC<SignUpProps> = ({ isDarkMode, toggleTheme }) => {
             </div>
 
             {/*error && <p className="mensagem-erro">{error}</p>*/}
-            
+
             <div className="terms-group">
               <input type="checkbox" id="terms" name="terms" required />
               <label htmlFor="terms">
-                Ao criar a conta, eu aceito os <a href="#">Termos e Condições</a>, e <a href="#">Política de Privacidade</a>.
+                Ao criar a conta, eu aceito os {' '}
+                <a href="#" onClick={openTermsModal} className="disclaimer-link">
+                  Termos e Condições</a>, e
+                <a href="#" onClick={openPrivacyModal} className="disclaimer-link"> Política de Privacidade</a>.
               </label>
             </div>
 
@@ -151,8 +175,24 @@ const SignUp: React.FC<SignUpProps> = ({ isDarkMode, toggleTheme }) => {
           </p>
         </div>
       </main>
+
+      <TermsModal
+        isOpen={isTermsModalOpen}
+        onClose={closeTermsModal}
+        isDarkMode={isDarkMode}
+      />
+
+      <PrivacyModal
+        isOpen={isPrivacyModalOpen}
+        onClose={closePrivacyModal}
+        isDarkMode={isDarkMode}
+      />
+
     </div>
+
   );
 }
+
+
 
 export default SignUp;
