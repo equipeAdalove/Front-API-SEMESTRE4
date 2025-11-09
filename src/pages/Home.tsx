@@ -1,5 +1,5 @@
 import { FaGithub } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 import octopusImage from '../assets/Polvo_AdaTech.png';
 
 type HomeProps = {
@@ -8,7 +8,7 @@ type HomeProps = {
 };
 
 function Home({ isDarkMode, toggleTheme }: HomeProps) {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const handleNavigate = () => {
     navigate('/login');
@@ -20,13 +20,13 @@ function Home({ isDarkMode, toggleTheme }: HomeProps) {
         <nav className="header-nav">
           <span className="logo-text">AdaTech</span>
           <label className="switch">
-          <input
-            type="checkbox"
-            checked={isDarkMode}
-            onChange={toggleTheme}
-          />
-          <span className="slider round"></span>
-        </label>
+            <input
+              type="checkbox"
+              checked={isDarkMode}
+              onChange={toggleTheme}
+            />
+            <span className="slider round"></span>
+          </label>
         </nav>
       </header>
 
@@ -44,7 +44,7 @@ function Home({ isDarkMode, toggleTheme }: HomeProps) {
       </main>
 
       <footer className="home-footer">
-        <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="help-link">
+        <a href="https://github.com/equipeAdalove/API-SEMESTRE4" target="_blank" rel="noopener noreferrer" className="help-link">
           <FaGithub />
           <span>Preciso de ajuda</span>
         </a>
