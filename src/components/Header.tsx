@@ -1,8 +1,7 @@
-import { FaBars, FaUserCircle, FaSignOutAlt } from "react-icons/fa"; 
+import { FaBars, FaUserCircle, FaArrowLeft } from "react-icons/fa"; 
 import { LuToggleLeft, LuToggleRight } from "react-icons/lu";
-import { useAuth } from "../context/AuthContext"; 
 import "../index.css"; 
-
+import { useNavigate, useLocation } from "react-router-dom"; 
 type HeaderProps = {
   isDarkMode: boolean;
   toggleTheme: () => void;
@@ -10,11 +9,28 @@ type HeaderProps = {
 };
 
 function Header({ isDarkMode, toggleTheme, onProfileClick }: HeaderProps) {
-  const { isAuthenticated, logout } = useAuth(); 
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleGoBack = () => {
+    navigate('/principal');
+  };
   
   return (
     <header className="profile-header"> 
-      <FaBars size={24} className="menu-icon" />
+      <div className="header-left-items">
+        
+        <FaBars size={24} className="menu-icon" />
+
+        {location.pathname === '/perfil' && (
+          <FaArrowLeft 
+            size={24} 
+            className="icon back-arrow" 
+            onClick={handleGoBack} 
+          />
+        )}
+      </div>
+
       <div className="header-actions">
         {isDarkMode ? (
           <LuToggleRight 
@@ -36,14 +52,6 @@ function Header({ isDarkMode, toggleTheme, onProfileClick }: HeaderProps) {
           onClick={onProfileClick} 
         />
         
-        {isAuthenticated && (
-          <FaSignOutAlt
-            size={28}
-            className="icon logout-icon"
-            onClick={logout}
-            style={{ cursor: 'pointer', marginLeft: '10px' }} 
-          />
-        )}
       </div>
     </header>
   );
