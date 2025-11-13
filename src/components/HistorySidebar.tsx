@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react'; // NOVO: Importa useMemo
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Loader from './Loader';
@@ -9,6 +9,22 @@ type TransacaoInfo = {
     nome: string | null; 
     created_at: string;
 };
+
+// Objeto auxiliar para os meses
+const mesesDoAno = [
+    { val: "1", nome: "Janeiro" },
+    { val: "2", nome: "Fevereiro" },
+    { val: "3", nome: "Março" },
+    { val: "4", nome: "Abril" },
+    { val: "5", nome: "Maio" },
+    { val: "6", nome: "Junho" },
+    { val: "7", nome: "Julho" },
+    { val: "8", nome: "Agosto" },
+    { val: "9", nome: "Setembro" },
+    { val: "10", nome: "Outubro" },
+    { val: "11", nome: "Novembro" },
+    { val: "12", nome: "Dezembro" },
+];
 
 const fetchAPI = async (url: string, options: RequestInit = {}) => {
     const token = localStorage.getItem("authToken");
@@ -100,6 +116,10 @@ const HistoryItem: React.FC<{
                 onClick={onCloseSidebar}
             >
                 {transacao.nome || `Processo #${transacao.id}`}
+                {/* NOVO: Adiciona data formatada (opcional, mas ajuda) */}
+                <span className="sidebar-item-date">
+                    {new Date(transacao.created_at).toLocaleDateString()}
+                </span>
             </Link>
             <div className="sidebar-item-actions" ref={dropdownRef}>
                 <FaEllipsisV onClick={() => setIsDropdownOpen(!isDropdownOpen)} />
@@ -117,9 +137,15 @@ const HistoryItem: React.FC<{
 };
 
 const HistorySidebar: React.FC<HistorySidebarProps> = ({ isOpen, onClose }) => {
-    const [transacoes, setTransacoes] = useState<TransacaoInfo[]>([]);
+    // ALTERADO: Renomeado para guardar a lista completa
+    const [allTransacoes, setAllTransacoes] = useState<TransacaoInfo[]>([]); 
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+
+    // NOVO: Estados para os filtros e anos disponíveis
+    const [selectedYear, setSelectedYear] = useState<string>('');
+    const [selectedMonth, setSelectedMonth] = useState<string>('');
+    const [availableYears, setAvailableYears] = useState<string[]>([]);
 
     const fetchTransacoes = async () => {
         setIsLoading(true);
@@ -129,7 +155,7 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({ isOpen, onClose }) => {
             throw new Error('Falha ao buscar histórico.');
         }
         const data: TransacaoInfo[] = await response.json();
-        setTransacoes(data);
+        setAllTransacoes(data); // ALTERADO: Seta a lista completa
         } catch (err: any) {
         toast.error(err.message);
         } finally {
@@ -142,10 +168,40 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({ isOpen, onClose }) => {
         fetchTransacoes();
         }
     }, [isOpen]);
+    
+    // NOVO: useEffect para extrair os anos disponíveis da lista de transações
+    useEffect(() => {
+        if (allTransacoes.length > 0) {
+            const years = allTransacoes.map(t => 
+                new Date(t.created_at).getFullYear().toString()
+            );
+            const uniqueYears = [...new Set(years)].sort((a, b) => b.localeCompare(a)); // Ordena do mais novo para o mais antigo
+            setAvailableYears(uniqueYears);
+        }
+    }, [allTransacoes]);
+
+    // NOVO: useMemo para aplicar os filtros
+    const filteredTransacoes = useMemo(() => {
+        return allTransacoes.filter(t => {
+            const itemDate = new Date(t.created_at);
+            const itemYear = itemDate.getFullYear().toString();
+            const itemMonth = (itemDate.getMonth() + 1).toString(); // JS Date.getMonth() é 0-11
+
+            // Se selectedYear não estiver setado (valor ' ') ou for igual, 'yearMatch' é true
+            const yearMatch = !selectedYear || itemYear === selectedYear;
+            // Se selectedMonth não estiver setado (valor ' ') ou for igual, 'monthMatch' é true
+            const monthMatch = !selectedMonth || itemMonth === selectedMonth;
+
+            return yearMatch && monthMatch;
+        });
+    }, [allTransacoes, selectedYear, selectedMonth]);
 
     const handleNewProcess = () => {
         onClose(); 
         navigate('/principal'); 
+        // NOVO: Limpa os filtros ao criar um novo processo
+        setSelectedYear('');
+        setSelectedMonth('');
     };
 
     const handleRename = async (id: number, novoNome: string) => {
@@ -156,7 +212,8 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({ isOpen, onClose }) => {
         });
         if (!response.ok) throw new Error("Falha ao renomear.");
         toast.success("Processo renomeado!");
-        setTransacoes(prev => prev.map(t => t.id === id ? { ...t, nome: novoNome } : t));
+        // ALTERADO: Atualiza a lista completa
+        setAllTransacoes(prev => prev.map(t => t.id === id ? { ...t, nome: novoNome } : t));
         } catch (err: any) {
         toast.error(err.message);
         }
@@ -169,7 +226,8 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({ isOpen, onClose }) => {
         });
         if (!response.ok) throw new Error("Falha ao excluir.");
         toast.success("Processo excluído!");
-        setTransacoes(prev => prev.filter(t => t.id !== id));
+        // ALTERADO: Atualiza a lista completa
+        setAllTransacoes(prev => prev.filter(t => t.id !== id));
         } catch (err: any) {
         toast.error(err.message);
         }
@@ -184,17 +242,42 @@ return (
         
         <div className={`sidebar-menu ${isOpen ? 'open' : ''}`}>
             <div className="sidebar-header">
-            <h3>Histórico de Processos</h3>
-            <button onClick={handleNewProcess} className="new-process-btn">
-                <FaPlus /> Novo Processo
-            </button>
+                <h3>Histórico de Processos</h3>
+                
+                {/* NOVO: Seção de Filtros */}
+                <div className="sidebar-filters">
+                    <select 
+                        value={selectedMonth} 
+                        onChange={(e) => setSelectedMonth(e.target.value)}
+                    >
+                        <option value="">Todos os Meses</option>
+                        {mesesDoAno.map(mes => (
+                            <option key={mes.val} value={mes.val}>{mes.nome}</option>
+                        ))}
+                    </select>
+                    <select 
+                        value={selectedYear} 
+                        onChange={(e) => setSelectedYear(e.target.value)}
+                    >
+                        <option value="">Todos os Anos</option>
+                        {availableYears.map(year => (
+                            <option key={year} value={year}>{year}</option>
+                        ))}
+                    </select>
+                </div>
+                {/* Fim da Seção de Filtros */}
+
+                <button onClick={handleNewProcess} className="new-process-btn">
+                    <FaPlus /> Novo Processo
+                </button>
             </div>
             
             <div className="sidebar-list">
             {isLoading ? (
                 <Loader />
             ) : (
-                transacoes.map((t) => (
+                // ALTERADO: Mapeia a lista filtrada
+                filteredTransacoes.map((t) => (
                 <HistoryItem 
                     key={t.id}
                     transacao={t}
@@ -204,8 +287,11 @@ return (
                 />
                 ))
             )}
-            {transacoes.length === 0 && !isLoading && (
-                <p className="sidebar-empty">Nenhum processo encontrado.</p>
+            {/* ALTERADO: Verifica a lista filtrada */}
+            {filteredTransacoes.length === 0 && !isLoading && (
+                <p className="sidebar-empty">
+                    {allTransacoes.length > 0 ? "Nenhum processo encontrado para este filtro." : "Nenhum processo encontrado."}
+                </p>
             )}
             </div>
         </div>
