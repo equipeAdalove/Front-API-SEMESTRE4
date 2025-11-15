@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import PrivacyModal from "../components/PrivacyModal";
+import TermsModal from "../components/TermsModal ";
 
 const API_URL = "http://localhost:8000/api";
 
@@ -13,6 +15,23 @@ function Perfil() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
+
+  const openTermsModal = (e: React.MouseEvent) => {
+    e.preventDefault(); 
+    setIsTermsModalOpen(true);
+  };
+
+  const openPrivacyModal = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsPrivacyModalOpen(true);
+  };
+
+  const closeTermsModal = () => setIsTermsModalOpen(false);
+  const closePrivacyModal = () => setIsPrivacyModalOpen(false);
+
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -89,8 +108,8 @@ function Perfil() {
           </div>
           <div className="card-footer">
             <div className="footer-links">
-              <a href="#">Política de Privacidade</a>
-              <a href="#">Termos e condições</a>
+              <a href="#" onClick={openPrivacyModal}>Política de Privacidade</a>
+              <a href="#" onClick={openTermsModal}>Termos e condições</a>
             </div>
             <button className="logout-button" onClick={handleLogout}>
               Sair da conta
@@ -101,6 +120,16 @@ function Perfil() {
           Meu objetivo é simplificar esse processo, tornando-o mais rápido, confiável e livre de erros.
         </p>
       </div>
+
+      <TermsModal
+        isOpen={isTermsModalOpen}
+        onClose={closeTermsModal}
+      />
+
+      <PrivacyModal
+        isOpen={isPrivacyModalOpen}
+        onClose={closePrivacyModal}
+      />
     </>
   );
 }

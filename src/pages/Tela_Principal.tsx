@@ -60,6 +60,8 @@ function Tela_Principal() {
       const loadTransaction = async () => {
         setUiState("processing"); 
         setError(null);
+        setProcessedItems([]);
+        
         try {
           const response = await fetchAPI(`http://localhost:8000/api/transacao/${transacaoId}`);
           
@@ -70,10 +72,19 @@ function Tela_Principal() {
 
           const data = await response.json(); 
           
-          setProcessedItems(data.items);
+          if (data.processed_items && data.processed_items.length > 0) {
+             setProcessedItems(data.processed_items);
+             setUiState("processed");
+          } else if (data.pending_items && data.pending_items.length > 0) {
+             setExtractedItems(data.pending_items);
+             setUiState("extracted");
+          } else {
+             toast.info("Esta transação não possui itens.");
+             setUiState("initial");
+          }
+
           setCurrentTransactionId(data.transacao_id);
           setFile(null); 
-          setUiState("processed"); 
           
         } catch (err: any) {
           toast.error(err.message);
@@ -173,44 +184,13 @@ function Tela_Principal() {
     }
   };
 
-  const handleExport = async () => {
-    if (processedItems.length === 0) return;
-
-    setUiState("exporting");
-    setError(null);
-    setSaveMessage(null); 
-    try {
-      const response = await fetchAPI("http://localhost:8000/api/generate_excel", {
-        method: "POST",
-        body: JSON.stringify({ items: processedItems }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || "Erro ao gerar o arquivo Excel.");
-      }
-      
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${file?.name.replace(".pdf", "") || 'processo'}_classificado.xlsx`;
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-      setUiState("downloaded");
-    } catch (err: any) {
-      toast.error(err.message || "Erro ao gerar Excel.");
-      setError(err.message);
-      setUiState("processed");
+  const handleSaveAndExport = async () => {
+    if (processedItems.length === 0) {
+      toast.warn("Não há itens processados para salvar ou exportar.");
+      return;
     }
-  };
-
-  const handleSaveToDB = async () => {
-    if (processedItems.length === 0) return;
-    
     if (!currentTransactionId) {
-      toast.error("Erro: ID da transação não encontrado para salvar.");
+      toast.error("Erro: ID da transação não encontrado.");
       return;
     }
 
@@ -219,42 +199,65 @@ function Tela_Principal() {
     setSaveMessage(null);
 
     try {
-      const response = await fetchAPI(`http://localhost:8000/api/update_transaction/${currentTransactionId}`, {
+      const saveResponse = await fetchAPI(`http://localhost:8000/api/update_transaction/${currentTransactionId}`, {
         method: "PUT", 
         body: JSON.stringify({ items: processedItems }),
       });
 
-      const responseBody = await response.text(); 
+      const responseBody = await saveResponse.text(); 
       let data;
       if (responseBody) {
           try {
               data = JSON.parse(responseBody); 
           } catch (jsonError) {
-              console.error("Erro ao parsear JSON da resposta:", jsonError);
-              if (!response.ok) { 
-                throw new Error("Erro no servidor: Resposta inválida.");
+              console.error("Erro ao parsear JSON do salvamento:", jsonError);
+              if (!saveResponse.ok) { 
+                throw new Error("Erro no servidor: Resposta inválida ao salvar.");
               }
               data = { message: responseBody };
           }
-      } else if (!response.ok) {
-          throw new Error(`Erro no servidor: Status ${response.status}`);
+      } else if (!saveResponse.ok) {
+          throw new Error(`Erro no servidor: Status ${saveResponse.status}`);
       }
 
+      if (!saveResponse.ok) {
+        throw new Error(data?.detail || `Erro ao salvar: Status ${saveResponse.status}`);
+      }
+      
+      toast.success(data?.message || "Alterações salvas com sucesso!"); 
+      
+      const exportResponse = await fetchAPI("http://localhost:8000/api/generate_excel", {
+        method: "POST",
+        body: JSON.stringify({ items: processedItems }),
+      });
 
       if (!response.ok) {
          throw new Error(data?.detail || `Erro ao salvar: Status ${response.status}`);
       } else {
           toast.success("Alterações salvas com sucesso!"); 
           setUiState("processed"); 
+      if (!exportResponse.ok) {
+        const errorData = await exportResponse.json();
+        throw new Error(errorData.detail || "Erro ao gerar o arquivo Excel (mas os dados foram salvos).");
       }
+      
+      const blob = await exportResponse.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${file?.name.replace(".pdf", "") || 'processo'}_classificado.xlsx`;
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      
+      setUiState("downloaded");
 
     } catch (err: any) {
-      console.error("Erro na função handleSaveToDB:", err); 
-      toast.error(err.message || "Ocorreu um erro ao tentar salvar.");
+      console.error("Erro em handleSaveAndExport:", err); 
+      toast.error(err.message || "Ocorreu um erro ao salvar ou exportar.");
       setUiState("processed"); 
     }
   };
-
 
   const handleExtractedChange = (
     index: number,
@@ -317,7 +320,6 @@ function Tela_Principal() {
     <div className="page-container">
       <main className="main-content">
         
-        {/* --- CORREÇÃO (Pedido 2): 'welcome-section' é sempre visível --- */}
         <div className="welcome-section">
           <img src={adatech} alt="Logo de Polvo" className="octopus-logo" />
 
@@ -351,8 +353,7 @@ function Tela_Principal() {
             )}
           </div>
 
-            {/* Mostra a caixa de upload APENAS se não houver ID de transação */}
-            {!transacaoId && !isLoading && (
+            {!transacaoId && uiState === "initial" && !isLoading && (
               <UploadBox
                 file={file}
                 loading={false}
@@ -370,19 +371,16 @@ function Tela_Principal() {
               />
             )}
             
-            {/* Mostra o loader de upload/extração (só se !transacaoId) */}
-            {isLoading && !transacaoId && (
+            {!transacaoId && (uiState === 'extracting' || uiState === 'processing') && (
               <Loader />
             )}
 
-            {/* Mostra o loader de carregamento de histórico (só se transacaoId) */}
-            {isLoading && transacaoId && (
+            {transacaoId && isLoading && (
               <Loader />
             )}
 
             {saveMessage && !error && <p className="success-message" style={{ color: 'green', marginTop: '1rem', fontWeight: 'bold' }}>{saveMessage}</p>}
 
-            {/* Oculta disclaimer se estiver no histórico */}
             {uiState === "initial" && !file && !transacaoId && (
               <p className="disclaimer">
                 A IA pode cometer erros. Considere verificar informações
@@ -391,8 +389,6 @@ function Tela_Principal() {
             )}
           </div>
         </div>
-        {/* --- FIM DA CORREÇÃO --- */}
-
 
         {uiState === "extracted" && !isLoading && (
           <section className="validation-section">
@@ -401,7 +397,6 @@ function Tela_Principal() {
               Verifique e corrija os Part Numbers e descrições extraídos antes
               de continuar.
             </p>
-            {/* --- CORREÇÃO (Pedido 2): Adiciona a div 'form-list-grid' --- */}
             <div className="form-list-grid"> 
               {extractedItems.map((item, index) => (
                 <ExtractionFormSection
@@ -424,15 +419,12 @@ function Tela_Principal() {
 
         {uiState === "processed" && !isLoading && (
           <section className="validation-section">
-            {/* Adiciona título APENAS se for um item do histórico */}
-            {transacaoId && (
+            {transacaoId ? (
               <h2>Visualizando Histórico:</h2>
-            )}
-            {!transacaoId && (
+            ) : (
               <h2>Validação Final:</h2>
             )}
             
-            {/* --- CORREÇÃO (Pedido 2): Adiciona a div 'form-list-grid' --- */}
             <div className="form-list-grid">
               {processedItems.map((item, index) => (
                 <FormSection
@@ -445,23 +437,23 @@ function Tela_Principal() {
             </div>
             <p className="editable-note">É possível editar os campos!</p>
 
-            <button
-              onClick={handleSaveToDB}
-              disabled={isLoading}
-              className="export-button save-db"
-              style={{ marginRight: '1rem' }} 
-            >
-              {/* Texto do botão muda se for histórico */}
-              {transacaoId ? "Salvar Alterações" : "Salvar no Banco"}
-            </button>
+            <div className="form-action-buttons">
+              <button
+                onClick={handleSaveAndExport}
+                disabled={isLoading}
+                className="export-button"
+              >
+                Salvar e Exportar .xlsx
+              </button>
 
-            <button
-              onClick={handleExport}
-              disabled={isLoading}
-              className="export-button"
-            >
-              Confirmar e exportar .xlsx
-            </button>
+              <button
+                onClick={resetState}
+                disabled={isLoading}
+                className="export-button save-db" 
+              >
+                Finalizar Processo
+              </button>
+            </div>
           </section>
         )}
 
@@ -478,29 +470,19 @@ function Tela_Principal() {
           </section>
         )}
 
-        {/* Esta seção já estava correta, pois inclui a verificação !transacaoId */}
         {uiState === "initial" && !file && !transacaoId && (
           <section className="mission-section">
-            <p>
-              Minha missão é automatizar a criação da instrução de registro
-              aduaneiro...
-            </p>
-            <p>Para isso, eu:</p>
-            <ul>
-              <li>
-                Organizo e relaciono dados essenciais...
-              </li>
-              <li>
-                Gero descrições precisas...
-              </li>
-              <li>
-                Asseguro que a documentação seja compreensível...
-              </li>
-            </ul>
-            <p>
-              Meu objetivo é simplificar esse processo...
-            </p>
-          </section>
+              <p>
+              Minha missão é automatizar a criação da instrução de registro aduaneiro, garantindo que ela seja clara, completa e em conformidade com as exigências legais.
+              </p>
+              <p>Para isso, eu:</p>
+              <ul>
+              <li>Organizo e relaciono dados essenciais como Part-Number, NCM, fabricante e origem completa (com endereço)</li>
+              <li>Gero descrições precisas dos produtos, evitando ambiguidades;</li>
+              <li>Asseguro que a documentação seja compreensível para a Receita Federal, reduzindo o risco de multas ou penalidades.</li>
+              </ul>
+              <p>Meu objetivo é simplificar esse processo, tornando-o mais rápido, confiável e livre de erros.</p>
+            </section>
         )}
       </main>
     </div>
