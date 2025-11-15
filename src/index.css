@@ -1315,6 +1315,7 @@ a:hover {
 
 .validation-section {
   margin-bottom: 2rem;
+  width: 100%;
 }
 
 .page-container {
@@ -1921,4 +1922,15 @@ a:hover {
 
 .sidebar-list::-webkit-scrollbar-thumb:hover {
   background-color: var(--button-hover-color); 
+}
+
+.form-action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.form-action-buttons button {
+  flex: 1; 
+  margin-top: 0; 
 }
