@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react'; // NOVO: Importa useMemo
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Loader from './Loader';
@@ -10,7 +10,6 @@ type TransacaoInfo = {
     created_at: string;
 };
 
-// Objeto auxiliar para os meses
 const mesesDoAno = [
     { val: "1", nome: "Janeiro" },
     { val: "2", nome: "Fevereiro" },
@@ -116,7 +115,6 @@ const HistoryItem: React.FC<{
                 onClick={onCloseSidebar}
             >
                 {transacao.nome || `Processo #${transacao.id}`}
-                {/* NOVO: Adiciona data formatada (opcional, mas ajuda) */}
                 <span className="sidebar-item-date">
                     {new Date(transacao.created_at).toLocaleDateString()}
                 </span>
@@ -137,12 +135,10 @@ const HistoryItem: React.FC<{
 };
 
 const HistorySidebar: React.FC<HistorySidebarProps> = ({ isOpen, onClose }) => {
-    // ALTERADO: Renomeado para guardar a lista completa
     const [allTransacoes, setAllTransacoes] = useState<TransacaoInfo[]>([]); 
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
-    // NOVO: Estados para os filtros e anos disponíveis
     const [selectedYear, setSelectedYear] = useState<string>('');
     const [selectedMonth, setSelectedMonth] = useState<string>('');
     const [availableYears, setAvailableYears] = useState<string[]>([]);
@@ -155,7 +151,7 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({ isOpen, onClose }) => {
             throw new Error('Falha ao buscar histórico.');
         }
         const data: TransacaoInfo[] = await response.json();
-        setAllTransacoes(data); // ALTERADO: Seta a lista completa
+        setAllTransacoes(data); 
         } catch (err: any) {
         toast.error(err.message);
         } finally {
@@ -169,27 +165,23 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({ isOpen, onClose }) => {
         }
     }, [isOpen]);
     
-    // NOVO: useEffect para extrair os anos disponíveis da lista de transações
     useEffect(() => {
         if (allTransacoes.length > 0) {
             const years = allTransacoes.map(t => 
                 new Date(t.created_at).getFullYear().toString()
             );
-            const uniqueYears = [...new Set(years)].sort((a, b) => b.localeCompare(a)); // Ordena do mais novo para o mais antigo
+            const uniqueYears = [...new Set(years)].sort((a, b) => b.localeCompare(a)); 
             setAvailableYears(uniqueYears);
         }
     }, [allTransacoes]);
 
-    // NOVO: useMemo para aplicar os filtros
     const filteredTransacoes = useMemo(() => {
         return allTransacoes.filter(t => {
             const itemDate = new Date(t.created_at);
             const itemYear = itemDate.getFullYear().toString();
-            const itemMonth = (itemDate.getMonth() + 1).toString(); // JS Date.getMonth() é 0-11
+            const itemMonth = (itemDate.getMonth() + 1).toString(); 
 
-            // Se selectedYear não estiver setado (valor ' ') ou for igual, 'yearMatch' é true
             const yearMatch = !selectedYear || itemYear === selectedYear;
-            // Se selectedMonth não estiver setado (valor ' ') ou for igual, 'monthMatch' é true
             const monthMatch = !selectedMonth || itemMonth === selectedMonth;
 
             return yearMatch && monthMatch;
@@ -199,7 +191,6 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({ isOpen, onClose }) => {
     const handleNewProcess = () => {
         onClose(); 
         navigate('/principal'); 
-        // NOVO: Limpa os filtros ao criar um novo processo
         setSelectedYear('');
         setSelectedMonth('');
     };
@@ -212,7 +203,6 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({ isOpen, onClose }) => {
         });
         if (!response.ok) throw new Error("Falha ao renomear.");
         toast.success("Processo renomeado!");
-        // ALTERADO: Atualiza a lista completa
         setAllTransacoes(prev => prev.map(t => t.id === id ? { ...t, nome: novoNome } : t));
         } catch (err: any) {
         toast.error(err.message);
@@ -226,7 +216,6 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({ isOpen, onClose }) => {
         });
         if (!response.ok) throw new Error("Falha ao excluir.");
         toast.success("Processo excluído!");
-        // ALTERADO: Atualiza a lista completa
         setAllTransacoes(prev => prev.filter(t => t.id !== id));
         } catch (err: any) {
         toast.error(err.message);
@@ -244,7 +233,6 @@ return (
             <div className="sidebar-header">
                 <h3>Histórico de Processos</h3>
                 
-                {/* NOVO: Seção de Filtros */}
                 <div className="sidebar-filters">
                     <select 
                         value={selectedMonth} 
@@ -265,7 +253,6 @@ return (
                         ))}
                     </select>
                 </div>
-                {/* Fim da Seção de Filtros */}
 
                 <button onClick={handleNewProcess} className="new-process-btn">
                     <FaPlus /> Novo Processo
@@ -276,7 +263,6 @@ return (
             {isLoading ? (
                 <Loader />
             ) : (
-                // ALTERADO: Mapeia a lista filtrada
                 filteredTransacoes.map((t) => (
                 <HistoryItem 
                     key={t.id}
@@ -287,7 +273,6 @@ return (
                 />
                 ))
             )}
-            {/* ALTERADO: Verifica a lista filtrada */}
             {filteredTransacoes.length === 0 && !isLoading && (
                 <p className="sidebar-empty">
                     {allTransacoes.length > 0 ? "Nenhum processo encontrado para este filtro." : "Nenhum processo encontrado."}
