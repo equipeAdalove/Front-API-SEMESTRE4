@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Loader from './Loader';
@@ -9,6 +9,21 @@ type TransacaoInfo = {
     nome: string | null; 
     created_at: string;
 };
+
+const mesesDoAno = [
+    { val: "1", nome: "Janeiro" },
+    { val: "2", nome: "Fevereiro" },
+    { val: "3", nome: "Março" },
+    { val: "4", nome: "Abril" },
+    { val: "5", nome: "Maio" },
+    { val: "6", nome: "Junho" },
+    { val: "7", nome: "Julho" },
+    { val: "8", nome: "Agosto" },
+    { val: "9", nome: "Setembro" },
+    { val: "10", nome: "Outubro" },
+    { val: "11", nome: "Novembro" },
+    { val: "12", nome: "Dezembro" },
+];
 
 const fetchAPI = async (url: string, options: RequestInit = {}) => {
     const token = localStorage.getItem("authToken");
@@ -100,6 +115,9 @@ const HistoryItem: React.FC<{
                 onClick={onCloseSidebar}
             >
                 {transacao.nome || `Processo #${transacao.id}`}
+                <span className="sidebar-item-date">
+                    {new Date(transacao.created_at).toLocaleDateString()}
+                </span>
             </Link>
             <div className="sidebar-item-actions" ref={dropdownRef}>
                 <FaEllipsisV onClick={() => setIsDropdownOpen(!isDropdownOpen)} />
@@ -117,9 +135,13 @@ const HistoryItem: React.FC<{
 };
 
 const HistorySidebar: React.FC<HistorySidebarProps> = ({ isOpen, onClose }) => {
-    const [transacoes, setTransacoes] = useState<TransacaoInfo[]>([]);
+    const [allTransacoes, setAllTransacoes] = useState<TransacaoInfo[]>([]); 
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+
+    const [selectedYear, setSelectedYear] = useState<string>('');
+    const [selectedMonth, setSelectedMonth] = useState<string>('');
+    const [availableYears, setAvailableYears] = useState<string[]>([]);
 
     const fetchTransacoes = async () => {
         setIsLoading(true);
@@ -129,7 +151,7 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({ isOpen, onClose }) => {
             throw new Error('Falha ao buscar histórico.');
         }
         const data: TransacaoInfo[] = await response.json();
-        setTransacoes(data);
+        setAllTransacoes(data); 
         } catch (err: any) {
         toast.error(err.message);
         } finally {
@@ -142,10 +164,35 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({ isOpen, onClose }) => {
         fetchTransacoes();
         }
     }, [isOpen]);
+    
+    useEffect(() => {
+        if (allTransacoes.length > 0) {
+            const years = allTransacoes.map(t => 
+                new Date(t.created_at).getFullYear().toString()
+            );
+            const uniqueYears = [...new Set(years)].sort((a, b) => b.localeCompare(a)); 
+            setAvailableYears(uniqueYears);
+        }
+    }, [allTransacoes]);
+
+    const filteredTransacoes = useMemo(() => {
+        return allTransacoes.filter(t => {
+            const itemDate = new Date(t.created_at);
+            const itemYear = itemDate.getFullYear().toString();
+            const itemMonth = (itemDate.getMonth() + 1).toString(); 
+
+            const yearMatch = !selectedYear || itemYear === selectedYear;
+            const monthMatch = !selectedMonth || itemMonth === selectedMonth;
+
+            return yearMatch && monthMatch;
+        });
+    }, [allTransacoes, selectedYear, selectedMonth]);
 
     const handleNewProcess = () => {
         onClose(); 
         navigate('/principal'); 
+        setSelectedYear('');
+        setSelectedMonth('');
     };
 
     const handleRename = async (id: number, novoNome: string) => {
@@ -156,7 +203,7 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({ isOpen, onClose }) => {
         });
         if (!response.ok) throw new Error("Falha ao renomear.");
         toast.success("Processo renomeado!");
-        setTransacoes(prev => prev.map(t => t.id === id ? { ...t, nome: novoNome } : t));
+        setAllTransacoes(prev => prev.map(t => t.id === id ? { ...t, nome: novoNome } : t));
         } catch (err: any) {
         toast.error(err.message);
         }
@@ -169,7 +216,7 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({ isOpen, onClose }) => {
         });
         if (!response.ok) throw new Error("Falha ao excluir.");
         toast.success("Processo excluído!");
-        setTransacoes(prev => prev.filter(t => t.id !== id));
+        setAllTransacoes(prev => prev.filter(t => t.id !== id));
         } catch (err: any) {
         toast.error(err.message);
         }
@@ -184,17 +231,39 @@ return (
         
         <div className={`sidebar-menu ${isOpen ? 'open' : ''}`}>
             <div className="sidebar-header">
-            <h3>Histórico de Processos</h3>
-            <button onClick={handleNewProcess} className="new-process-btn">
-                <FaPlus /> Novo Processo
-            </button>
+                <h3>Histórico de Processos</h3>
+                
+                <div className="sidebar-filters">
+                    <select 
+                        value={selectedMonth} 
+                        onChange={(e) => setSelectedMonth(e.target.value)}
+                    >
+                        <option value="">Todos os Meses</option>
+                        {mesesDoAno.map(mes => (
+                            <option key={mes.val} value={mes.val}>{mes.nome}</option>
+                        ))}
+                    </select>
+                    <select 
+                        value={selectedYear} 
+                        onChange={(e) => setSelectedYear(e.target.value)}
+                    >
+                        <option value="">Todos os Anos</option>
+                        {availableYears.map(year => (
+                            <option key={year} value={year}>{year}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <button onClick={handleNewProcess} className="new-process-btn">
+                    <FaPlus /> Novo Processo
+                </button>
             </div>
             
             <div className="sidebar-list">
             {isLoading ? (
                 <Loader />
             ) : (
-                transacoes.map((t) => (
+                filteredTransacoes.map((t) => (
                 <HistoryItem 
                     key={t.id}
                     transacao={t}
@@ -204,8 +273,10 @@ return (
                 />
                 ))
             )}
-            {transacoes.length === 0 && !isLoading && (
-                <p className="sidebar-empty">Nenhum processo encontrado.</p>
+            {filteredTransacoes.length === 0 && !isLoading && (
+                <p className="sidebar-empty">
+                    {allTransacoes.length > 0 ? "Nenhum processo encontrado para este filtro." : "Nenhum processo encontrado."}
+                </p>
             )}
             </div>
         </div>
