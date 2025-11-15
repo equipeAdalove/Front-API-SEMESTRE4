@@ -12,6 +12,7 @@ import MainLayout from "./components/MainLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RecuperarSenha from "./pages/Recuperar_Senha";
 import Verificacao from "./pages/Verificacao";
+import NovaSenha from "./pages/Nova_Senha";
 
 import "./index.css";
 
@@ -66,6 +67,16 @@ function App() {
           path="/verificacao"
           element={
             <Verificacao
+              isDarkMode={isDarkMode}
+              toggleTheme={toggleTheme}
+            />
+          }
+        />
+
+        <Route
+          path="/NovaSenha"
+          element={
+            <NovaSenha
               isDarkMode={isDarkMode}
               toggleTheme={toggleTheme}
             />
