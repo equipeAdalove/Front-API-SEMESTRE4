@@ -231,6 +231,11 @@ function Tela_Principal() {
         body: JSON.stringify({ items: processedItems }),
       });
 
+      if (!response.ok) {
+         throw new Error(data?.detail || `Erro ao salvar: Status ${response.status}`);
+      } else {
+          toast.success("Alterações salvas com sucesso!"); 
+          setUiState("processed"); 
       if (!exportResponse.ok) {
         const errorData = await exportResponse.json();
         throw new Error(errorData.detail || "Erro ao gerar o arquivo Excel (mas os dados foram salvos).");
@@ -319,10 +324,34 @@ function Tela_Principal() {
           <img src={adatech} alt="Logo de Polvo" className="octopus-logo" />
 
           <div className="content-right">
-            <div className="welcome-text">
-              <h1>Bem-vindo(a)!</h1>
-              <p>Como posso ajudar?</p>
-            </div>
+          <div className="welcome-text">
+            {isLoading ? (
+              <>
+                <h1>Aguarde...</h1>
+                <p>O documento está sendo processado.</p>
+              </>
+            ) : uiState === 'extracted' ? (
+              <>
+                <h1>Extração Concluída</h1>
+                <p>Por favor, valide os dados abaixo.</p>
+              </>
+            ) : uiState === 'processed' ? (
+              <>
+                <h1> Dados Processados</h1>
+                <p>Valide os dados antes de salvar ou exportar.</p>
+              </>
+            ) : uiState === 'downloaded' ? (
+              <>
+                <h1>Exportação Concluída</h1>
+                <p>Seu arquivo foi gerado com sucesso.</p>
+              </>
+            ) : (
+              <>
+                <h1>Bem-vindo(a)!</h1>
+                <p>Como posso ajudar?</p>
+              </>
+            )}
+          </div>
 
             {!transacaoId && uiState === "initial" && !isLoading && (
               <UploadBox
