@@ -66,9 +66,9 @@ function Login({ isDarkMode, toggleTheme }: LoginProps) {
       </div>
 
       <header className="home-header">
-        <div className="logo">
-          <span>AdaTech</span>
-        </div>
+        <Link to="/" className="logo">
+            AdaTech
+          </Link>
         <label className="switch">
           <input
             type="checkbox"
