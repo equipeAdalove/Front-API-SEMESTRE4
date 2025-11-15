@@ -3,6 +3,9 @@ import "../index.css";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
+// URL da API (ajuste se necessário)
+const API_URL = "http://localhost:8000/api";
+
 type RecuperarSenhaProps = {
   isDarkMode: boolean;
   toggleTheme: () => void;
@@ -23,11 +26,31 @@ function Recuperar_Senha({ isDarkMode, toggleTheme }: RecuperarSenhaProps) {
 
     setIsLoading(true);
 
-    setTimeout(() => {
-      toast.success("Verifique seu e-mail para o código de verificação!");
+    try {
+      // Endpoint que criamos no backend
+      const response = await fetch(`${API_URL}/auth/password-recovery`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || "Erro ao enviar e-mail de recuperação.");
+      }
+
+      toast.success("Código enviado! Verifique seu e-mail.");
+      
+      // NAVEGAÇÃO: Passamos o email para a próxima tela via state
+      navigate("/verificacao", { state: { email: email } });
+
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Erro ao conectar com o servidor.");
+    } finally {
       setIsLoading(false);
-      navigate("/verificacao"); // Redireciona após sucesso
-    }, 1500);
+    }
   };
 
   return (
@@ -38,15 +61,9 @@ function Recuperar_Senha({ isDarkMode, toggleTheme }: RecuperarSenhaProps) {
         ))}
       </div>
       <header className="home-header">
-        <div className="logo">
-          <span>AdaTech</span>
-        </div>
+        <div className="logo"><span>AdaTech</span></div>
         <label className="switch">
-          <input
-            type="checkbox"
-            checked={isDarkMode}
-            onChange={toggleTheme}
-          />
+          <input type="checkbox" checked={isDarkMode} onChange={toggleTheme} />
           <span className="slider round"></span>
         </label>
       </header>
@@ -54,8 +71,7 @@ function Recuperar_Senha({ isDarkMode, toggleTheme }: RecuperarSenhaProps) {
       <div className="login-card">
         <h1>Esqueceu sua senha?</h1>
         <p className="text">
-          Digite o e-mail vinculado à sua conta, e te enviaremos as instruções
-          para atualização da senha!
+          Digite o e-mail vinculado à sua conta para receber o código.
         </p>
 
         <form className="login-form" onSubmit={handleSubmit}>
@@ -72,7 +88,7 @@ function Recuperar_Senha({ isDarkMode, toggleTheme }: RecuperarSenhaProps) {
           </div>
 
           <button type="submit" disabled={isLoading}>
-            {isLoading ? "Enviando..." : "Confirmar"}
+            {isLoading ? "Enviando..." : "Enviar Código"}
           </button>
         </form>
       </div>

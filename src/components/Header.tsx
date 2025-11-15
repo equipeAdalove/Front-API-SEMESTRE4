@@ -4,7 +4,6 @@ import {
   FaArrowLeft, 
   FaSignOutAlt 
 } from "react-icons/fa"; 
-import { LuToggleLeft, LuToggleRight } from "react-icons/lu";
 import "../index.css"; 
 import { useNavigate, useLocation } from "react-router-dom"; 
 import { useAuth } from "../context/AuthContext"; 
@@ -27,9 +26,7 @@ function Header({ isDarkMode, toggleTheme, onProfileClick, onMenuClick }: Header
   
   return (
     <header className="profile-header"> 
-    
       <div className="header-left-items">
-        
         <FaBars 
           size={24} 
           className="menu-icon" 
@@ -47,20 +44,15 @@ function Header({ isDarkMode, toggleTheme, onProfileClick, onMenuClick }: Header
       </div>
 
       <div className="header-actions">
-        {isDarkMode ? (
-          <LuToggleRight 
-            size={32} 
-            className="icon toggle-icon" 
-            onClick={toggleTheme} 
+        <label className="switch">
+          <input
+            type="checkbox"
+            checked={isDarkMode}
+            onChange={toggleTheme}
           />
-        ) : (
-          <LuToggleLeft 
-            size={32} 
-            className="icon toggle-icon" 
-            onClick={toggleTheme} 
-          />
-        )}
-        
+          <span className="slider round"></span>
+        </label>
+
         <FaUserCircle 
           size={32} 
           className="profile-icon" 

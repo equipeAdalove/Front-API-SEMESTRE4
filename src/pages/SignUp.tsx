@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import '../index.css';
 import { toast } from 'react-toastify'
 import PrivacyModal from '../components/PrivacyModal';
-import TermsModal from '../components/TermsModal ';
+import TermsModal from '../components/TermsModal';
 
 interface SignUpProps {
   isDarkMode: boolean;

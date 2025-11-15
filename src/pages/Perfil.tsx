@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PrivacyModal from "../components/PrivacyModal";
+import TermsModal from "../components/TermsModal";
 import TermsModal from "../components/TermsModal ";
 
 const API_URL = "http://localhost:8000/api";
@@ -15,6 +16,8 @@ function Perfil() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
 
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
@@ -47,7 +50,7 @@ function Perfil() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -58,7 +61,6 @@ function Perfil() {
         }
 
         setUserProfile(data);
-
       } catch (err: any) {
         setError(err.message);
         localStorage.removeItem("authToken");
@@ -76,13 +78,8 @@ function Perfil() {
     navigate("/login");
   };
 
-  if (isLoading) {
-    return <div>Carregando perfil...</div>;
-  }
-
-  if (error) {
-    return <div>Erro: {error}</div>;
-  }
+  if (isLoading) return <div>Carregando perfil...</div>;
+  if (error) return <div>Erro: {error}</div>;
 
   return (
     <>
@@ -91,6 +88,7 @@ function Perfil() {
           <div className="welcome-avatar"></div>
           <h2>Bem-vindo(a), {userProfile?.name}!</h2>
         </div>
+
         <div className="profile-card">
           <h3>Informações sobre a conta:</h3>
           <div className="info-grid">
@@ -103,24 +101,49 @@ function Perfil() {
             <span className="info-label">Senha:</span>
             <div className="info-value password-field">
               <span>**********</span>
-              <a href="#">Atualizar senha</a>
             </div>
           </div>
+
           <div className="card-footer">
             <div className="footer-links">
+              <a
+                type="button"
+                onClick={() => setShowPrivacyModal(true)}
+                className="disclaimer-link"
+              >
+                Política de Privacidade
+              </a>
+
+              <a
+                type="button"
+                onClick={() => setShowTermsModal(true)}
+                className="disclaimer-link"
+              >
+                Termos e Condições
+              </a>
               <a href="#" onClick={openPrivacyModal}>Política de Privacidade</a>
               <a href="#" onClick={openTermsModal}>Termos e condições</a>
             </div>
+
             <button className="logout-button" onClick={handleLogout}>
               Sair da conta
             </button>
           </div>
         </div>
+
         <p className="profile-slogan">
           Meu objetivo é simplificar esse processo, tornando-o mais rápido, confiável e livre de erros.
         </p>
       </div>
 
+      {/* Modais */}
+      <PrivacyModal
+        isOpen={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+      />
+      <TermsModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
       <TermsModal
         isOpen={isTermsModalOpen}
         onClose={closeTermsModal}
