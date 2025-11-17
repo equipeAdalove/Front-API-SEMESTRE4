@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PrivacyModal from "../components/PrivacyModal";
 import TermsModal from "../components/TermsModal";
-import TermsModal from "../components/TermsModal ";
+
 
 const API_URL = "http://localhost:8000/api";
 
@@ -143,11 +143,12 @@ function Perfil() {
       />
       <TermsModal
         isOpen={showTermsModal}
-        onClose={() => setShowTermsModal(false)}
+        onClose={() => setShowTermsModal(false)}/>
+
       <TermsModal
         isOpen={isTermsModalOpen}
         onClose={closeTermsModal}
-      />
+    />
 
       <PrivacyModal
         isOpen={isPrivacyModalOpen}
