@@ -21,7 +21,7 @@ function Header({ isDarkMode, toggleTheme, onProfileClick, onMenuClick }: Header
   const { isAuthenticated, logout } = useAuth(); 
 
   const handleGoBack = () => {
-    navigate('/principal');
+    navigate(-1);
   };
   
   return (

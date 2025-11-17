@@ -41,7 +41,6 @@ const fetchAPI = async (url: string, options: RequestInit = {}) => {
   return response;
 };
 
-
 function Tela_Principal() {
   const navigate = useNavigate();
   const { transacaoId } = useParams<{ transacaoId?: string }>();
@@ -98,7 +97,6 @@ function Tela_Principal() {
     }
   }, [transacaoId, navigate]);
 
-
   const isLoading =
     uiState === "extracting" ||
     uiState === "processing" ||
@@ -120,6 +118,7 @@ function Tela_Principal() {
     }
   };
 
+  // --- AQUI ESTÁ A IMPLEMENTAÇÃO ADAPTADA ---
   const handleExtract = async () => {
     if (!file) return;
 
@@ -142,16 +141,17 @@ function Tela_Principal() {
       
       const data = await response.json(); 
       
-      setExtractedItems(data.items);
-      setCurrentTransactionId(data.transacao_id); 
-      setUiState("extracted");
+      // MUDANÇA: Em vez de setar o estado manualmente aqui, navegamos para a URL.
+      // O useEffect lá em cima detectará o ID na URL e carregará os dados.
+      navigate(`/principal/${data.transacao_id}`);
 
     } catch (err: any) {
       toast.error(err.message || "Ocorreu um erro desconhecido.");
-      setError(err.message) 
+      setError(err.message);
       setUiState("initial");
     }
   };
+  // --- FIM DA ADAPTAÇÃO ---
 
   const handleProcess = async () => {
     if (!currentTransactionId) {
@@ -199,6 +199,7 @@ function Tela_Principal() {
     setSaveMessage(null);
 
     try {
+      // 1. Tenta salvar no banco (PUT)
       const saveResponse = await fetchAPI(`http://localhost:8000/api/update_transaction/${currentTransactionId}`, {
         method: "PUT", 
         body: JSON.stringify({ items: processedItems }),
@@ -206,46 +207,48 @@ function Tela_Principal() {
 
       const responseBody = await saveResponse.text(); 
       let data;
-      if (responseBody) {
-          try {
-              data = JSON.parse(responseBody); 
-          } catch (jsonError) {
-              console.error("Erro ao parsear JSON do salvamento:", jsonError);
-              if (!saveResponse.ok) { 
-                throw new Error("Erro no servidor: Resposta inválida ao salvar.");
-              }
-              data = { message: responseBody };
-          }
-      } else if (!saveResponse.ok) {
-          throw new Error(`Erro no servidor: Status ${saveResponse.status}`);
+      
+      // Tenta parsear o JSON de resposta do salvamento
+      try {
+         if (responseBody) {
+            data = JSON.parse(responseBody); 
+         }
+      } catch (jsonError) {
+         console.error("Erro ao parsear JSON do salvamento:", jsonError);
+         // Se falhar e o status não for OK, lança erro
+         if (!saveResponse.ok) { 
+           throw new Error("Erro no servidor: Resposta inválida ao salvar.");
+         }
+         data = { message: responseBody };
       }
 
       if (!saveResponse.ok) {
         throw new Error(data?.detail || `Erro ao salvar: Status ${saveResponse.status}`);
       }
       
-      toast.success(data?.message || "Alterações salvas com sucesso!"); 
-      
+      // Feedback visual de salvamento OK
+      setSaveMessage(data?.message || "Alterações salvas com sucesso!"); 
+      toast.success("Dados salvos! Gerando Excel...");
+
+      // 2. Tenta gerar o Excel (POST)
       const exportResponse = await fetchAPI("http://localhost:8000/api/generate_excel", {
         method: "POST",
         body: JSON.stringify({ items: processedItems }),
       });
 
-      if (!response.ok) {
-         throw new Error(data?.detail || `Erro ao salvar: Status ${response.status}`);
-      } else {
-          toast.success("Alterações salvas com sucesso!"); 
-          setUiState("processed"); 
       if (!exportResponse.ok) {
-        const errorData = await exportResponse.json();
+        const errorData = await exportResponse.json().catch(() => ({}));
         throw new Error(errorData.detail || "Erro ao gerar o arquivo Excel (mas os dados foram salvos).");
       }
       
+      // 3. Processa o download do arquivo
       const blob = await exportResponse.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${file?.name.replace(".pdf", "") || 'processo'}_classificado.xlsx`;
+      // Nome do arquivo sugerido
+      a.download = `${file?.name.replace(".pdf", "") || `transacao_${currentTransactionId}`}_classificado.xlsx`;
+      document.body.appendChild(a); // Necessário para Firefox em alguns casos
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
@@ -255,6 +258,7 @@ function Tela_Principal() {
     } catch (err: any) {
       console.error("Erro em handleSaveAndExport:", err); 
       toast.error(err.message || "Ocorreu um erro ao salvar ou exportar.");
+      // Se der erro, volta para tela de processados para o usuário tentar de novo
       setUiState("processed"); 
     }
   };

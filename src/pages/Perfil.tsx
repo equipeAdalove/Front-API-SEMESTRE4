@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PrivacyModal from "../components/PrivacyModal";
 import TermsModal from "../components/TermsModal";
-import TermsModal from "../components/TermsModal ";
 
 const API_URL = "http://localhost:8000/api";
 
@@ -13,28 +12,17 @@ interface UserProfile {
 
 function Perfil() {
   const navigate = useNavigate();
+  
+  // Estados de dados
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
+  // Estados dos Modais (Mantive apenas estes que são usados lá embaixo no JSX)
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
 
-  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
-  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
-
-  const openTermsModal = (e: React.MouseEvent) => {
-    e.preventDefault(); 
-    setIsTermsModalOpen(true);
-  };
-
-  const openPrivacyModal = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsPrivacyModalOpen(true);
-  };
-
-  const closeTermsModal = () => setIsTermsModalOpen(false);
-  const closePrivacyModal = () => setIsPrivacyModalOpen(false);
-
+  // --- REMOVIDO: Estados e funções duplicadas que não estavam sendo usadas nos Modais ---
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -110,6 +98,7 @@ function Perfil() {
                 type="button"
                 onClick={() => setShowPrivacyModal(true)}
                 className="disclaimer-link"
+                style={{ cursor: 'pointer' }} 
               >
                 Política de Privacidade
               </a>
@@ -118,11 +107,10 @@ function Perfil() {
                 type="button"
                 onClick={() => setShowTermsModal(true)}
                 className="disclaimer-link"
+                style={{ cursor: 'pointer' }} 
               >
                 Termos e Condições
               </a>
-              <a href="#" onClick={openPrivacyModal}>Política de Privacidade</a>
-              <a href="#" onClick={openTermsModal}>Termos e condições</a>
             </div>
 
             <button className="logout-button" onClick={handleLogout}>
@@ -144,14 +132,6 @@ function Perfil() {
       <TermsModal
         isOpen={showTermsModal}
         onClose={() => setShowTermsModal(false)}
-      <TermsModal
-        isOpen={isTermsModalOpen}
-        onClose={closeTermsModal}
-      />
-
-      <PrivacyModal
-        isOpen={isPrivacyModalOpen}
-        onClose={closePrivacyModal}
       />
     </>
   );
