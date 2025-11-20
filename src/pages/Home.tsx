@@ -1,6 +1,7 @@
 import { FaQuestionCircle } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import octopusImage from '../assets/Polvo_AdaTech.png';
+import manualPdf from '../documents/manual.pdf';
 
 type HomeProps = {
   isDarkMode: boolean;
@@ -44,10 +45,15 @@ function Home({ isDarkMode, toggleTheme }: HomeProps) {
       </main>
 
       <footer className="home-footer">
-        <a href="" target="_blank" rel="noopener noreferrer" className="help-link">
-          <FaQuestionCircle />
-          <span>Preciso de ajuda</span>
-        </a>
+       <a 
+        href={manualPdf} 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className="help-link"
+        title="Abrir Manual do Usuário">
+        <FaQuestionCircle />
+        <span>Preciso de ajuda</span>
+      </a>
       </footer>
     </div>
   );
