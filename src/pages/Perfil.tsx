@@ -18,11 +18,9 @@ function Perfil() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  // Estados dos Modais (Mantive apenas estes que são usados lá embaixo no JSX)
+  // Estados dos Modais
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
-
-  // --- REMOVIDO: Estados e funções duplicadas que não estavam sendo usadas nos Modais ---
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -79,17 +77,34 @@ function Perfil() {
 
         <div className="profile-card">
           <h3>Informações sobre a conta:</h3>
+          
           <div className="info-grid">
-            <span className="info-label">Nome Completo:</span>
-            <span className="info-value">{userProfile?.name}</span>
-
-            <span className="info-label">Email:</span>
-            <span className="info-value">{userProfile?.email}</span>
-
-            <span className="info-label">Senha:</span>
-            <div className="info-value password-field">
-              <span>**********</span>
+            
+            <div className="info-row">
+              <span className="info-label">Nome Completo:</span>
+              <span className="info-value">{userProfile?.name}</span>
             </div>
+
+            <div className="info-row">
+              <span className="info-label">Email:</span>
+              <span className="info-value">{userProfile?.email}</span>
+            </div>
+
+            <div className="info-row">
+              <span className="info-label">Senha:</span>
+              <div className="info-value password-field">
+                <span>**********</span>
+                <a 
+                  type="button" 
+                  onClick={() => navigate("/AtualizarSenha")} 
+                  className="disclaimer-link" 
+                  style={{ cursor: 'pointer', marginLeft: '20px' }} 
+                >
+                  Atualizar senha
+                </a>
+              </div>
+            </div>
+
           </div>
 
           <div className="card-footer">
