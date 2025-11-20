@@ -868,17 +868,24 @@ input:checked + .slider:before {
   color: var(--primary-text-color);
 }
 
+/* === MUDANÇAS AQUI (INFO GRID E ROW) === */
 .info-grid {
-  display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 20px 30px;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 25px; /* Espaço entre as linhas (Nome -> Email -> Senha) */
   font-size: 1.1rem;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Espaço pequeno entre Rótulo e Valor na mesma linha */
 }
 
 .info-label {
   font-weight: bold;
   color: var(--primary-text-color);
+  white-space: nowrap; /* Garante que o rótulo não quebre linha */
 }
 
 .info-value {
